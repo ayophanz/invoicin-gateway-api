@@ -3,10 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\CustomerController;
 
-Route::group(['prefix' => 'customers', 'middleware' => ['auth']], function () {
+Route::group(['middleware' => ['auth']], function () {
     Route::controller(CustomerController::class)->group(function () {
-        Route::get('', 'index');
-        Route::get('show', 'show');
-        Route::post('store', 'store');
+        Route::get('customers', 'index');
+        Route::get('customers/show', 'show');
+        Route::post('customers/store', 'store');
+        Route::put('customers/update/{id}', 'update');
+        Route::delete('customers/destroy/{id}', 'destroy');
     });
 });

@@ -77,7 +77,7 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        return $this->customerService->updateCustomer($request, $id);
     }
 
     /**
@@ -86,8 +86,8 @@ class CustomerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        //
+        return $this->customerService->destroyCustomer($request, $id);
     }
 }

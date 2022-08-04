@@ -28,4 +28,14 @@ class CustomerService
     {
         return $this->forwardRequest('/api/customers/store', $request);
     }
+
+    public function updateCustomer(Request $request, $id)
+    {
+        return $this->forwardRequest('/api/customers/update/' . $id, $request);
+    }
+
+    public function destroyCustomer(Request $request, $id)
+    {
+        return $this->forwardRequest('/api/customers/destroy/' . $id, $request);
+    }
 }
