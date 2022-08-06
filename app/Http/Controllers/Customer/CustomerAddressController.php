@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\CustomerService;
 
-class CustomerController extends Controller
+class CustomerAddressController extends Controller
 {
     private $customerService;
 
@@ -20,9 +20,9 @@ class CustomerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, $id)
     {
-        return $this->customerService->fetchCustomers($request);
+        return $this->customerService->fetchCustomerAddresses($request, $id);
     }
 
     /**
@@ -41,9 +41,9 @@ class CustomerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $id)
     {
-        return $this->customerService->storeCustomer($request);
+        return $this->customerService->storeCustomerAddress($request, $id);
     }
 
     /**
@@ -54,7 +54,7 @@ class CustomerController extends Controller
      */
     public function show(Request $request, $id)
     {
-        return $this->customerService->fetchCustomer($request, $id);
+        return $this->customerService->fetchCustomerAddress($request, $id);
     }
 
     /**
@@ -77,7 +77,7 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return $this->customerService->updateCustomer($request, $id);
+        return $this->customerService->updateCustomerAddress($request, $id);
     }
 
     /**
@@ -88,6 +88,6 @@ class CustomerController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        return $this->customerService->destroyCustomer($request, $id);
+        return $this->customerService->destroyCustomerAddress($request, $id);
     }
 }
