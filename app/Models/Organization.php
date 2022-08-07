@@ -7,13 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Services\OrganizationService;
 use App\Traits\UUID;
+use App\Traits\ApiResponser;
 
 class Organization extends Model
 {
-    use HasFactory, SoftDeletes, UUID;
+    use HasFactory, SoftDeletes, UUID, ApiResponser;
+
+    private $organizationService;
+    private $request;
+
+    public function __construct()
+    {
+        $this->organizationService = new OrganizationService();
+        $this->request             = request();
+    }
 
     protected $casts = [
-        'setting' => 'array',
+        'settings' => 'array',
+        'addresses' => 'array',
     ];
 
     /**
@@ -28,14 +39,17 @@ class Organization extends Model
         'type',
     ];
 
-    public function getSettingAttribute()
+    public function getSettingsAttribute()
     {
-        $organizationService  = new OrganizationService();
-        $setting = $organizationService->fetchSetting();
-        $decode = json_decode($setting->original, true);
-        if ($decode['code'] ?? null && $decode['code'] == 401) {
-            return $decode['error'];
-        }
-        return $decode['data'];
+        $settings = $this->organizationService->fetchSettings($this->request);
+        $decoded = json_decode($settings->original, true);
+        return $decoded;
+    }
+
+    public function getAddressesAttribute()
+    {
+        $addresses = $this->organizationService->fetchAddresses($this->request);
+        $decoded = json_decode($addresses->original, true);
+        return $decoded;
     }
 }

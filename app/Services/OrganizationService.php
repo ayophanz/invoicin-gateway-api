@@ -19,8 +19,23 @@ class OrganizationService
         $this->baseUri = config('services.organization.base_uri');
     }
 
-    public function fetchSetting()
+    public function fetchSettings(Request $request)
     {
-        return $this->request('GET', '/api/setting');
+        return $this->forwardRequest('/api/organization/settings', $request);
+    }
+
+    public function fetchAddresses(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/addresses', $request);
+    }
+
+    public function storeAddress(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/addresses/store', $request);
+    }
+
+    public function updateAddress(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/addresses/update', $request);
     }
 }
