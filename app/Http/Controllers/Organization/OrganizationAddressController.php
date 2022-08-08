@@ -32,7 +32,7 @@ class OrganizationAddressController extends Controller
      */
     public function index()
     {
-        //
+       // 
     }
 
     /**
@@ -85,7 +85,7 @@ class OrganizationAddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         return $this->organizationService->updateAddress($request);
     }
@@ -96,8 +96,8 @@ class OrganizationAddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        //
+        return $this->organizationService->destroyAddress($request);
     }
 }

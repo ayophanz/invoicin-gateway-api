@@ -38,4 +38,9 @@ class OrganizationService
     {
         return $this->forwardRequest('/api/organization/addresses/update', $request);
     }
+
+    public function destroyAddress(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/addresses/destroy', $request);
+    }
 }
