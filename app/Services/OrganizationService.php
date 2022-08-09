@@ -19,16 +19,24 @@ class OrganizationService
         $this->baseUri = config('services.organization.base_uri');
     }
 
-    public function fetchSettings(Request $request)
+    /** Organization */
+    public function fetchOrganization(Request $request)
     {
-        return $this->forwardRequest('/api/organization/settings', $request);
+        return $this->forwardRequest('/api/organization/show', $request);
     }
 
-    public function fetchAddresses(Request $request)
+    public function storeOrganization(Request $request)
     {
-        return $this->forwardRequest('/api/organization/addresses', $request);
+        return $this->forwardRequest('/api/organization/store', $request);
     }
 
+    /** Organization settings */
+    public function storeSetting(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/settings/store', $request);
+    }
+
+    /** Organization addresses */
     public function storeAddress(Request $request)
     {
         return $this->forwardRequest('/api/organization/addresses/store', $request);

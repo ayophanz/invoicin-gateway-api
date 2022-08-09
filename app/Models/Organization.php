@@ -2,54 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Services\OrganizationService;
-use App\Traits\UUID;
-use App\Traits\ApiResponser;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Organization extends Model
 {
-    use HasFactory, SoftDeletes, UUID, ApiResponser;
-
-    private $organizationService;
-    private $request;
-
-    public function __construct()
-    {
-        $this->organizationService = new OrganizationService();
-        $this->request             = request();
-    }
-
-    protected $casts = [
-        'settings' => 'array',
-        'addresses' => 'array',
-    ];
-
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var array
      */
-    protected $fillable = [
-        'organization_id',
-        'name',
-        'email',
-        'type',
-    ];
+    protected $guarded = [];
 
-    public function getSettingsAttribute()
+    public function __construct(array $attributes = [], $data = [])
     {
-        $settings = $this->organizationService->fetchSettings($this->request);
-        $decoded = json_decode($settings->original, true);
-        return $decoded;
-    }
+        parent::__construct($attributes);
 
-    public function getAddressesAttribute()
-    {
-        $addresses = $this->organizationService->fetchAddresses($this->request);
-        $decoded = json_decode($addresses->original, true);
-        return $decoded;
+        foreach ($data as $k => $v) {
+            $this->$k = $v;
+        }
     }
 }

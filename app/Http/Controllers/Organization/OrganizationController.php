@@ -5,17 +5,12 @@ namespace App\Http\Controllers\Organization;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
+use App\Services\OrganizationService;
 use Auth;
 
 class OrganizationController extends Controller
 {
-
-    /**
-     * The authentication guard factory instance.
-     *
-     * @var \Illuminate\Contracts\Auth\Factory
-     */
-    protected $auth;
+    protected $organizationService;
 
     /**
      * Create a new middleware instance.
@@ -23,9 +18,9 @@ class OrganizationController extends Controller
      * @param  \Illuminate\Contracts\Auth\Factory  $auth
      * @return void
      */
-    public function __construct()
+    public function __construct(OrganizationService $organizationService)
     {
-        $this->auth = Auth::user();
+        $this->organizationService = $organizationService;
     }
 
     /**
@@ -67,13 +62,7 @@ class OrganizationController extends Controller
      */
     public function show(Request $request)
     {
-        $organizaiton = Organization::where('uuid', $this->auth->organization_id)->first();
-        return response()->json([
-            'uuid' => $organizaiton->uuid,
-            'name' => $organizaiton->name,
-            'settings' => $organizaiton->settings,
-            'addresses' => $organizaiton->addresses,
-        ]);
+        return $this->organizationService->fetchOrganization($request);
     }
 
     /**
