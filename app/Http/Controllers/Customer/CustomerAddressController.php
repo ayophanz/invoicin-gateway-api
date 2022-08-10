@@ -1,26 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Organization;
+namespace App\Http\Controllers\Customer;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Organization;
-use App\Services\OrganizationService;
-use Auth;
+use App\Services\CustomerService;
 
-class OrganizationController extends Controller
+class CustomerAddressController extends Controller
 {
-    protected $organizationService;
+    private $customerService;
 
-    /**
-     * Create a new middleware instance.
-     *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth
-     * @return void
-     */
-    public function __construct(OrganizationService $organizationService)
+    public function __construct(CustomerService $customerService)
     {
-        $this->organizationService = $organizationService;
+        $this->customerService = $customerService;
     }
 
     /**
@@ -49,9 +41,9 @@ class OrganizationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $id)
     {
-        //
+        return $this->customerService->storeCustomerAddress($request, $id);
     }
 
     /**
@@ -60,9 +52,9 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request)
+    public function show(Request $request, $id)
     {
-        return $this->organizationService->fetchOrganization($request);
+        return $this->customerService->fetchCustomerAddress($request, $id);
     }
 
     /**
@@ -85,7 +77,7 @@ class OrganizationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        return $this->customerService->updateCustomerAddress($request, $id);
     }
 
     /**
@@ -94,8 +86,8 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        //
+        return $this->customerService->destroyCustomerAddress($request, $id);
     }
 }

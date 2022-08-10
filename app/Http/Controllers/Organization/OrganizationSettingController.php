@@ -4,20 +4,12 @@ namespace App\Http\Controllers\Organization;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Organization;
 use App\Services\OrganizationService;
-use Auth;
 
-class OrganizationController extends Controller
+class OrganizationSettingController extends Controller
 {
     protected $organizationService;
 
-    /**
-     * Create a new middleware instance.
-     *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth
-     * @return void
-     */
     public function __construct(OrganizationService $organizationService)
     {
         $this->organizationService = $organizationService;
@@ -51,7 +43,7 @@ class OrganizationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return $this->organizationService->storeSetting($request);
     }
 
     /**
@@ -60,9 +52,9 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request)
+    public function show($id)
     {
-        return $this->organizationService->fetchOrganization($request);
+        //
     }
 
     /**
@@ -83,9 +75,9 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        return $this->organizationService->updateSetting($request);
     }
 
     /**
@@ -94,8 +86,8 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        //
+        return $this->organizationService->destroySetting($request);
     }
 }

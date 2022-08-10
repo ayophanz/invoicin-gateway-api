@@ -8,19 +8,15 @@ use App\Models\Organization;
 use App\Services\OrganizationService;
 use Auth;
 
-class OrganizationController extends Controller
+class OrganizationAddressController extends Controller
 {
+    protected $auth;
     protected $organizationService;
 
-    /**
-     * Create a new middleware instance.
-     *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth
-     * @return void
-     */
     public function __construct(OrganizationService $organizationService)
     {
         $this->organizationService = $organizationService;
+        $this->auth = Auth::user();
     }
 
     /**
@@ -30,7 +26,7 @@ class OrganizationController extends Controller
      */
     public function index()
     {
-        //
+       // 
     }
 
     /**
@@ -51,7 +47,7 @@ class OrganizationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return $this->organizationService->storeAddress($request);
     }
 
     /**
@@ -62,7 +58,7 @@ class OrganizationController extends Controller
      */
     public function show(Request $request)
     {
-        return $this->organizationService->fetchOrganization($request);
+        //
     }
 
     /**
@@ -83,9 +79,9 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        return $this->organizationService->updateAddress($request);
     }
 
     /**
@@ -94,8 +90,8 @@ class OrganizationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        //
+        return $this->organizationService->destroyAddress($request);
     }
 }
