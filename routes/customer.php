@@ -14,14 +14,12 @@ Route::group(['prefix' => 'customers', 'middleware' => ['auth']], function () {
         Route::delete('{id}/destroy', 'destroy');
     });
     Route::controller(CustomerAddressController::class)->group(function () {
-        Route::get('{id}/addresses', 'index');
         Route::get('{id}/addresses/show', 'show');
         Route::post('{id}/addresses/store', 'store');
         Route::put('{id}/addresses/update', 'update');
         Route::delete('{id}/addresses/destroy', 'destroy');
     });
     Route::controller(CustomerSettingController::class)->group(function () {
-        Route::get('{id}/settings', 'index');
         Route::post('{id}/settings/store', 'store');
         Route::put('{id}/settings/update', 'update');
         Route::delete('{id}/settings/destroy', 'destroy');

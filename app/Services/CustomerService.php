@@ -27,7 +27,7 @@ class CustomerService
 
     public function fetchCustomer(Request $request, $id)
     {
-        return $this->forwardRequest('/api/customers/' . $id, $request);
+        return $this->forwardRequest('/api/customers/' . $id .'/show', $request);
     }
 
     public function storeCustomer(Request $request)
@@ -46,11 +46,6 @@ class CustomerService
     }
 
     /** Customer Address */
-    public function fetchCustomerAddresses(Request $request, $id)
-    {
-        return $this->forwardRequest('/api/customers/' . $id . '/addresses', $request);
-    }
-
     public function fetchCustomerAddress(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/addresses/show', $request);
@@ -72,11 +67,6 @@ class CustomerService
     }
 
     /** Customer Setting */
-    public function fetchCustomerSettings(Request $request, $id)
-    {
-        return $this->forwardRequest('/api/customers/' . $id . '/settings' , $request);
-    }
-
     public function storeCustomerSetting(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/settings/store', $request);

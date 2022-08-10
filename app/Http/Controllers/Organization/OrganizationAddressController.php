@@ -13,12 +13,6 @@ class OrganizationAddressController extends Controller
     protected $auth;
     protected $organizationService;
 
-    /**
-     * Create a new middleware instance.
-     *
-     * @param  \Illuminate\Contracts\Auth\Factory  $auth
-     * @return void
-     */
     public function __construct(OrganizationService $organizationService)
     {
         $this->organizationService = $organizationService;

@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Customer;
+namespace App\Http\Controllers\Organization;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Services\CustomerService;
+use App\Services\OrganizationService;
 
-class CustomerAddressController extends Controller
+class OrganizationSettingController extends Controller
 {
-    private $customerService;
+    protected $organizationService;
 
-    public function __construct(CustomerService $customerService)
+    public function __construct(OrganizationService $organizationService)
     {
-        $this->customerService = $customerService;
+        $this->organizationService = $organizationService;
     }
 
     /**
@@ -41,9 +41,9 @@ class CustomerAddressController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $id)
+    public function store(Request $request)
     {
-        return $this->customerService->storeCustomerAddress($request, $id);
+        return $this->organizationService->storeSetting($request);
     }
 
     /**
@@ -52,9 +52,9 @@ class CustomerAddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show($id)
     {
-        return $this->customerService->fetchCustomerAddress($request, $id);
+        //
     }
 
     /**
@@ -75,9 +75,9 @@ class CustomerAddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        return $this->customerService->updateCustomerAddress($request, $id);
+        return $this->organizationService->updateSetting($request);
     }
 
     /**
@@ -86,8 +86,8 @@ class CustomerAddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request)
     {
-        return $this->customerService->destroyCustomerAddress($request, $id);
+        return $this->organizationService->destroySetting($request);
     }
 }

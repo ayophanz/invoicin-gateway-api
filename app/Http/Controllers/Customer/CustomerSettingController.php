@@ -20,9 +20,9 @@ class CustomerSettingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, $id)
+    public function index()
     {
-        return $this->customerService->fetchCustomerSettings($request, $id);
+        //
     }
 
     /**
