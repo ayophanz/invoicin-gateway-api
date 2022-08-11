@@ -34,6 +34,10 @@ class OrganizationService
     {
         return $this->forwardRequest('/api/organization/settings/store', $request);
     }
+    public function showSetting(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/settings/show', $request);
+    }
     public function updateSetting(Request $request)
     {
         return $this->forwardRequest('/api/organization/settings/update', $request);
@@ -44,6 +48,10 @@ class OrganizationService
     }
 
     /** Organization addresses */
+    public function fetchAddress(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/addresses/show', $request);
+    }
     public function storeAddress(Request $request)
     {
         return $this->forwardRequest('/api/organization/addresses/store', $request);

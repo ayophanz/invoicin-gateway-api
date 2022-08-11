@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountController;
@@ -30,4 +31,8 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::controller(AccountController::class)->group(function () {
     Route::post('account/store', 'store');
+});
+
+Route::fallback(function () {
+    return response()->json(['Error' => 'Not Found'], Response::HTTP_NOT_FOUND);
 });

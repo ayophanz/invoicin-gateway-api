@@ -20,6 +20,7 @@ Route::group(['prefix' => 'customers', 'middleware' => ['auth']], function () {
         Route::delete('{id}/addresses/destroy', 'destroy');
     });
     Route::controller(CustomerSettingController::class)->group(function () {
+        Route::get('{id}/settings/show', 'show');
         Route::post('{id}/settings/store', 'store');
         Route::put('{id}/settings/update', 'update');
         Route::delete('{id}/settings/destroy', 'destroy');

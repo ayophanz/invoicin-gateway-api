@@ -46,38 +46,43 @@ class CustomerService
     }
 
     /** Customer Address */
-    public function fetchCustomerAddress(Request $request, $id)
+    public function fetchAddress(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/addresses/show', $request);
     }
 
-    public function storeCustomerAddress(Request $request, $id)
+    public function storeAddress(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/addresses/store', $request);
     }
 
-    public function updateCustomerAddress(Request $request, $id)
+    public function updateAddress(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/addresses/update', $request);
     }
 
-    public function destroyCustomerAddress(Request $request, $id)
+    public function destroyAddress(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/addresses/destroy', $request);
     }
 
     /** Customer Setting */
-    public function storeCustomerSetting(Request $request, $id)
+    public function showSetting(Request $request, $id)
+    {
+        return $this->forwardRequest('/api/customers/' . $id . '/settings/show', $request);
+    }
+
+    public function storeSetting(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/settings/store', $request);
     }
 
-    public function updateCustomerSetting(Request $request, $id)
+    public function updateSetting(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/settings/update', $request);
     }
 
-    public function destroyCustomerSetting(Request $request, $id)
+    public function destroySetting(Request $request, $id)
     {
         return $this->forwardRequest('/api/customers/' . $id . '/settings/destroy', $request);
     }

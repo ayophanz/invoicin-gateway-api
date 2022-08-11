@@ -43,7 +43,7 @@ class CustomerSettingController extends Controller
      */
     public function store(Request $request, $id)
     {
-        return $this->customerService->storeCustomerSetting($request, $id);
+        return $this->customerService->storeSetting($request, $id);
     }
 
     /**
@@ -54,7 +54,7 @@ class CustomerSettingController extends Controller
      */
     public function show(Request $request, $id)
     {
-        //
+        return $this->customerService->showSetting($request, $id);
     }
 
     /**
@@ -77,7 +77,7 @@ class CustomerSettingController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return $this->customerService->updateCustomerSetting($request, $id);
+        return $this->customerService->updateSetting($request, $id);
     }
 
     /**
@@ -88,6 +88,6 @@ class CustomerSettingController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        return $this->customerService->destroyCustomerSetting($request, $id);
+        return $this->customerService->destroySetting($request, $id);
     }
 }
