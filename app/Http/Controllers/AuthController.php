@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 
@@ -14,7 +15,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'refresh']]);
     }
 
     /**
@@ -22,15 +23,24 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login()
+    public function login(Request $request)
     {
-        $credentials = request(['email', 'password']);
+        $request->validate([
+            'email'    => 'required|string|email',
+            'password' => 'required|string'
+        ]);
 
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        $credentials = $request->only(['email', 'password']);
+
+        $token = Auth::attempt($credentials);
+        if (!$token) {
+            return response()->json([
+                'status'  => 'Error',
+                'message' => 'Unauthorized'
+            ], 401);
         }
 
-        return $this->respondWithToken($token);
+        return $this->tokenCreate($token);
     }
 
     /**
@@ -62,7 +72,7 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(auth()->refresh());
+        return $this->tokenCreate(auth()->refresh(true, true));
     }
 
     /**
@@ -72,12 +82,13 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token)
+    protected function tokenCreate($token)
     {
         return response()->json([
-            'access_token' => $token,
+            'token'      => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => auth()->factory()->getTTL() * 1,
+            'user_id'    => auth()->id(),
         ]);
     }
 }

@@ -49,6 +49,7 @@ class Authenticate
                     }
                 }
             } catch (\Exception $e) {
+                \Log::debug($e);
                 return response()->json([
                     'error' => [
                         'message' => 'Unauthorized',
