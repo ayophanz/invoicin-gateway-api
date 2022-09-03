@@ -91,6 +91,17 @@ class AccountController extends Controller
         return $this->errorResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
     }
 
+    public function storeTwofaSecret(Request $request, $id)
+    {
+        $user = User::find($id);
+        $user->twofa_secret = $request->twofa_secret;
+        $user->save();
+    }
+
+    public function generateTwofaSecret()
+    {
+
+    }   
     /**
      * Display the specified resource.
      *

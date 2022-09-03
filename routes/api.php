@@ -31,6 +31,7 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::controller(AccountController::class)->group(function () {
     Route::post('account/store', 'store');
+    Route::post('account/store-2fa-secret', 'storeTwofaSecret');
 });
 
 Route::fallback(function () {

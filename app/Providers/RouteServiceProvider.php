@@ -48,11 +48,11 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/web.php'));
 
             // Microservices
-            Route::middleware('api')
+            Route::middleware(['api', '2fa'])
                 ->prefix('api')
                 ->group(base_path('routes/organization.php'));
             
-            Route::middleware('api')
+            Route::middleware(['api', '2fa'])
                 ->prefix('api')
                 ->group(base_path('routes/customer.php'));
         });

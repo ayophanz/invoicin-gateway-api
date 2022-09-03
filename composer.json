@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "bacon/bacon-qr-code": "^2.0",
         "beyondcode/laravel-websockets": "^1.13",
         "firebase/php-jwt": "^5.4",
         "fruitcake/laravel-cors": "^2.0",
@@ -14,6 +15,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "php-open-source-saver/jwt-auth": "^1.4",
+        "pragmarx/google2fa-laravel": "^2.0",
         "pusher/pusher-php-server": "^7.0",
         "timwassenburg/laravel-service-generator": "^1.0"
     },
