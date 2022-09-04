@@ -50,7 +50,17 @@ class AuthController extends Controller
      */
     public function me()
     {
-        return response()->json(auth()->user());
+        $isTwofa = false;
+        $user = auth()->user();
+        if ($twofa = $user::find($user->id)) {
+            if (!is_null($twofa->twofa_secret)) {
+                $isTwofa = true; 
+            }
+        }
+        return response()->json([
+            'me' => $user,
+            'is_twofa' => $isTwofa,
+        ]);
     }
 
     /**

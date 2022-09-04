@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
 use Auth;
+use Google2FA;
 
 class AccountController extends Controller
 {
@@ -96,11 +97,26 @@ class AccountController extends Controller
         $user = User::find($id);
         $user->twofa_secret = $request->twofa_secret;
         $user->save();
+
+        return response()->json([
+            'status' => 'Success'
+        ]);
     }
 
-    public function generateTwofaSecret()
+    public function generateTwofaQRcode()
     {
+        $user = Auth::user();
+        $secret = Google2FA::generateSecretKey();
+        $QRImageUrl = $google2fa->getQRCodeInline(
+            config('app.name'),
+            $user->email,
+            $secret,
+        );
 
+        return response()->json([
+            'qr_image_url' => $QRImageUrl,
+            'secret' => $secret,
+        ]);
     }   
     /**
      * Display the specified resource.
