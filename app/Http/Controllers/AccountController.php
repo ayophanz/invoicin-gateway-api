@@ -107,7 +107,7 @@ class AccountController extends Controller
     {
         $user = Auth::user();
         $secret = Google2FA::generateSecretKey();
-        $QRImageUrl = $google2fa->getQRCodeInline(
+        $QRImageUrl = Google2FA::getQRCodeInline(
             config('app.name'),
             $user->email,
             $secret,
