@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
@@ -22,7 +23,6 @@ class AccountController extends Controller
      */
     public function __construct(OrganizationService $organizationService)
     {
-        $this->middleware('auth:api', ['except' => ['store']]);
         $this->organizationService = $organizationService;
     }
 
@@ -92,9 +92,16 @@ class AccountController extends Controller
         return $this->errorResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
     }
 
-    public function storeTwofaSecret(Request $request, $id)
+    public function storeTwofaSecret(Request $request)
     {
-        $user = User::find($id);
+         /** Validation here */
+         $toValidate = [
+            'twofa_secret' => 'required',
+        ];
+        $validator = Validator::make($request->all(), $toValidate);
+        if ($validator->fails()) return $this->errorResponse($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+        
+        $user = Auth::user();
         $user->twofa_secret = $request->twofa_secret;
         $user->save();
 
