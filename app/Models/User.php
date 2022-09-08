@@ -44,7 +44,6 @@ class User extends Authenticatable implements JWTSubject
         'last_name',
         'email',
         'password',
-        'twofa_secret',
     ];
 
     /**
@@ -55,7 +54,6 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
-        'twofa_secret',
     ];
 
     /**
@@ -67,11 +65,8 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
     ];
 
-    protected function twofaSecret(): Attribute
+    public function loginSecurity()
     {
-        return new Attribute(
-            get: fn ($value) =>  decrypt($value),
-            set: fn ($value) =>  encrypt($value),
-        );
+        return $this->hasOne(LoginSecurity::class);
     }
 }

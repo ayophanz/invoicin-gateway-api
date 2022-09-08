@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\Factory as Auth;
 use Illuminate\Http\Response;
 use Firebase\JWT\JWT;
 use App\Models\Organization;
+use App\Support\Google2FAAuthenticator;
 
 class Authenticate
 {
@@ -46,6 +47,19 @@ class Authenticate
                     $organization = Organization::find($payload->organization_id);
                     if ($organization) {
                         auth('api')->setUser($user);
+
+                        $authenticator = app(Google2FAAuthenticator::class)->boot($request);
+                        if (!$authenticator->isAuthenticated()) {
+                            return response()->json([
+                                'error' => [
+                                    'message' => 'Opt error',
+                                    'code' => 40104,
+                                    'status_code' => Response::HTTP_UNAUTHORIZED,
+                                    'data' => $authenticator->makeRequestOneTimePasswordResponse()
+                                ],
+                            ], Response::HTTP_UNAUTHORIZED);
+                        }
+
                     }
                 }
             } catch (\Exception $e) {
@@ -58,6 +72,7 @@ class Authenticate
                     ],
                 ], Response::HTTP_UNAUTHORIZED);
             }
+            
         } elseif ($this->auth->guard($guard)->guest()) {
             return response()->json([
                 'error' => [

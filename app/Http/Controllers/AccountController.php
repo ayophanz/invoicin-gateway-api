@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
 use Auth;
-use Google2FA;
 
 class AccountController extends Controller
 {
@@ -92,39 +91,6 @@ class AccountController extends Controller
         return $this->errorResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
     }
 
-    public function storeTwofaSecret(Request $request)
-    {
-         /** Validation here */
-         $toValidate = [
-            'twofa_secret' => 'required',
-        ];
-        $validator = Validator::make($request->all(), $toValidate);
-        if ($validator->fails()) return $this->errorResponse($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
-        
-        $user = Auth::user();
-        $user->twofa_secret = $request->twofa_secret;
-        $user->save();
-
-        return response()->json([
-            'status' => 'Success'
-        ]);
-    }
-
-    public function generateTwofaQRcode()
-    {
-        $user = Auth::user();
-        $secret = Google2FA::generateSecretKey();
-        $QRImageUrl = Google2FA::getQRCodeInline(
-            config('app.name'),
-            $user->email,
-            $secret,
-        );
-
-        return response()->json([
-            'qr_image_url' => $QRImageUrl,
-            'secret' => $secret,
-        ]);
-    }   
     /**
      * Display the specified resource.
      *
