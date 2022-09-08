@@ -47,7 +47,7 @@ class Authenticate
                     $organization = Organization::find($payload->organization_id);
                     if ($organization) {
                         auth('api')->setUser($user);
-
+                        \Log::debug('test');
                         $authenticator = app(Google2FAAuthenticator::class)->boot($request);
                         if (!$authenticator->isAuthenticated()) {
                             return response()->json([

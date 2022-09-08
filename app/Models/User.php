@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Services\OrganizationService;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -68,5 +69,11 @@ class User extends Authenticatable implements JWTSubject
     public function loginSecurity()
     {
         return $this->hasOne(LoginSecurity::class);
+    }
+
+    public function getOrganizationAttribute()
+    {
+        $organizationService = new OrganizationService();
+        return $organizationService->fetchOrganization($request);
     }
 }
