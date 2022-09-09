@@ -26,13 +26,11 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('logout', 'logout');
     Route::get('refresh', 'refresh');
-    Route::middleware(['auth'])->group(function () {
-        Route::get('me', 'me');
-        Route::post('generate-secret','generate2faSecret');
-        Route::get('generate-2fa-qr-code', 'generateTwofaQRcode');
-        Route::post('enable-2fa','enable2fa');
-        Route::post('disable-2fa', 'disable2fa');
-    });
+    Route::get('me', 'me')->middleware(['auth', 'throttle']);
+    Route::post('generate-secret','generate2faSecret');
+    Route::get('generate-2fa-qr-code', 'generateTwofaQRcode');
+    Route::post('enable-2fa','enable2fa');
+    Route::post('disable-2fa', 'disable2fa');
 });
 
 Route::controller(AccountController::class)->group(function () {

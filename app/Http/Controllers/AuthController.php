@@ -8,8 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\LoginSecurity;
+use App\Support\Google2FAAuthenticator;
 use Google2FA;
 use Hash;
+use PragmaRX\Google2FALaravel\Support\Authenticator;
 
 class AuthController extends Controller
 {
@@ -55,16 +57,11 @@ class AuthController extends Controller
      */
     public function me()
     {
-        $isTwofa = false;
-        $user = auth()->user();
-        // if ($twofa = $user::find($user->id)) {
-        //     if (!is_null($twofa->twofa_secret)) {
-        //         $isTwofa = true; 
-        //     }
-        // }
+        $user   = auth()->user();
+        $has2fa = $user->loginSecurity == null ? false : true;
         return response()->json([
             'me' => $user,
-            'is_twofa' => $isTwofa,
+            'has_2fa' => $has2fa,
         ]);
     }
 
@@ -115,7 +112,6 @@ class AuthController extends Controller
     public function enable2fa(Request $request){
         $user = Auth::user();
 
-        \Log::debug($request->all());
         $toValidate = [
             'optCode' => 'required',
         ];
@@ -123,7 +119,7 @@ class AuthController extends Controller
         if ($validator->fails()) return $this->errorResponse($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $optCode = $request->input('optCode');
-        $valid = Google2FA::verifyKey($user->loginSecurity->google2fa_secret, $optCode);
+        $valid   = Google2FA::verifyKey($user->loginSecurity->google2fa_secret, $optCode);
 
         if($valid){
             $user->loginSecurity->google2fa_enable = 1;
@@ -170,9 +166,14 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout()
+    public function logout(Request $request)
     {
-        auth()->logout();
+        $authenticator = app(Authenticator::class)->bootStateless($request);
+        if ($authenticator->isAuthenticated()) Google2FA::logout();
+        
+        if (auth()->check()) auth()->logout();  
+        $request->session()->flush();     
+
         return response()->json(['message' => 'Successfully logged out']);
     }
 

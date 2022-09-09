@@ -70,10 +70,4 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(LoginSecurity::class);
     }
-
-    public function getOrganizationAttribute()
-    {
-        $organizationService = new OrganizationService();
-        return $organizationService->fetchOrganization($request);
-    }
 }

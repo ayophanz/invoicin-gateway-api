@@ -52,7 +52,7 @@ return [
     /*
      * User's table column for google2fa secret.
      */
-    'otp_secret_column' => 'twofa_secret',
+    'otp_secret_column' => 'google2fa_secret',
 
     /*
      * One Time Password View.

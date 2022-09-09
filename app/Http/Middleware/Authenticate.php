@@ -8,6 +8,8 @@ use Illuminate\Http\Response;
 use Firebase\JWT\JWT;
 use App\Models\Organization;
 use App\Support\Google2FAAuthenticator;
+// use Google2FA;
+use PragmaRX\Google2FALaravel\Support\Authenticator;
 
 class Authenticate
 {
@@ -39,6 +41,23 @@ class Authenticate
      */
     public function handle($request, Closure $next, $guard = null)
     {
+        /**
+         * Checking 2FA 
+         */
+        $authenticator = app(Google2FAAuthenticator::class)->bootStateless($request);
+        // $authenticator = app(Authenticator::class)->bootStateless($request);
+        \Log::debug([$authenticator->isAuthenticated()]);
+        if (  !$authenticator->isAuthenticated()) {
+        // if (auth()->check() && auth()->user()->loginSecurity != null && auth()->user()->loginSecurity->google2fa_enable && !$authenticator->isAuthenticated()) {
+            return response()->json([
+                'error' => [
+                    'message' => 'Opt error',
+                    'code' => 40105,
+                    'status_code' => Response::HTTP_UNAUTHORIZED,
+                ],
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
         if ($request->header('Authorization') && strpos($request->header('Authorization'), 'JWT') !== false) {
             try {
                 preg_match('/JWT\s((.*)\.(.*)\.(.*))/', $request->header('Authorization'), $jwt);
@@ -47,23 +66,9 @@ class Authenticate
                     $organization = Organization::find($payload->organization_id);
                     if ($organization) {
                         auth('api')->setUser($user);
-                        \Log::debug('test');
-                        $authenticator = app(Google2FAAuthenticator::class)->boot($request);
-                        if (!$authenticator->isAuthenticated()) {
-                            return response()->json([
-                                'error' => [
-                                    'message' => 'Opt error',
-                                    'code' => 40104,
-                                    'status_code' => Response::HTTP_UNAUTHORIZED,
-                                    'data' => $authenticator->makeRequestOneTimePasswordResponse()
-                                ],
-                            ], Response::HTTP_UNAUTHORIZED);
-                        }
-
                     }
                 }
             } catch (\Exception $e) {
-                \Log::debug($e);
                 return response()->json([
                     'error' => [
                         'message' => 'Unauthorized',
