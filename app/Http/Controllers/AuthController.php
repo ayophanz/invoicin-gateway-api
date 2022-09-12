@@ -4,17 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\Controller;
 use App\Models\LoginSecurity;
-use App\Support\Google2FAAuthenticator;
+use App\Models\User;
+use App\Traits\ApiResponser;
+use \ParagonIE\ConstantTime\Base32;
 use Google2FA;
 use Hash;
-use PragmaRX\Google2FALaravel\Support\Authenticator;
+use Auth;
+use Crypt;
+use Session;
 
 class AuthController extends Controller
 {
+    use ApiResponser;
+
     /**
      * Create a new AuthController instance.
      *
@@ -25,6 +31,11 @@ class AuthController extends Controller
        //
     }
 
+    public function test_middleware()
+    {
+        return '2fa working';
+    }
+
     /**
      * Get a JWT via given credentials.
      *
@@ -32,6 +43,8 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        if (Auth::check()) Auth::logout(); 
+
         $request->validate([
             'email'    => 'required|string|email',
             'password' => 'required|string'
@@ -41,10 +54,26 @@ class AuthController extends Controller
 
         $token = Auth::attempt($credentials);
         if (!$token) {
+            $this->errorResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $user = Auth::user();
+        if ($user->loginSecurity && $user->loginSecurity->google2fa_enable) {
+            Auth::logout();
             return response()->json([
-                'status'  => 'Error',
-                'message' => 'Unauthorized'
-            ], 401);
+                'user_id'            => $user->id,
+                'otp_required'       => true,
+                'otp_setup_required' => false
+            ]);
+        }
+
+        if ($user->loginSecurity == null) {
+            Auth::logout();
+            return response()->json([
+                'user_id'            => $user->id,
+                'otp_setup_required' => true,
+                'otp_required'       => false
+            ]);
         }
 
         return $this->tokenCreate($token);
@@ -68,77 +97,127 @@ class AuthController extends Controller
     /**
      * Generate 2fa secret key
      */
-    public function generate2faSecret(Request $request){
-        $user = Auth::user();
-
-        $login_security = LoginSecurity::firstOrNew(array('user_id' => $user->id));
-        $login_security->user_id = $user->id;
+    public function generate2faSecret(Request $request)
+    {
+        $userId                           = $request->input('user_id');
+        $user                             = User::findOrFail($userId);
+        $secret                           = $this->generateSecret();
+        $login_security                   = LoginSecurity::firstOrNew(array('user_id' => $user->id));
+        $login_security->user_id          = $user->id;
         $login_security->google2fa_enable = 0;
-        $login_security->google2fa_secret = Google2FA::generateSecretKey();
+        $login_security->google2fa_secret = Crypt::encrypt($secret);
         $login_security->save();
 
         return response()->json([
-            'success' => true,
+            'success' => true
         ]);
+    }
+
+    /**
+     * Generate a secret key in Base32 format
+     *
+     * @return string
+     */
+    private function generateSecret()
+    {
+        $randomBytes = random_bytes(10);
+
+        return Base32::encodeUpper($randomBytes) ;
     }
 
     /**
      * Genearte 2f QR Code
      */
-    public function generateTwofaQRcode()
+    public function generateTwofaQRcode(Request $request)
     {
-        $user       = Auth::user();
+        $userId     = $request->input('user_id');
+        $user       = User::findOrFail($userId);
         $QRImageUrl = '';
         $secret     = '';
 
         if($user->loginSecurity()->exists()){
-            $secret_key = $user->loginSecurity->google2fa_secret;
+            $secret     = Crypt::decrypt($user->loginSecurity->google2fa_secret);
             $QRImageUrl = Google2FA::getQRCodeInline(
-                config('app.name'),
+                $request->getHttpHost(),
                 $user->email,
-                $user->loginSecurity->google2fa_secret
+                $secret,
+                200
             );
         }
 
         return response()->json([
             'qr_image_url' => $QRImageUrl,
-            'secret' => $secret,
+            'secret'       => $secret,
         ]);
     }  
 
     /**
      * Enable 2fa
      */
-    public function enable2fa(Request $request){
-        $user = Auth::user();
-
+    public function enable2fa(Request $request)
+    {
         $toValidate = [
-            'optCode' => 'required',
+            'otp_code' => 'required',
         ];
         $validator = Validator::make($request->all(), $toValidate);
         if ($validator->fails()) return $this->errorResponse($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $optCode = $request->input('optCode');
-        $valid   = Google2FA::verifyKey($user->loginSecurity->google2fa_secret, $optCode);
-
-        if($valid){
+        if ($this->cacheOtp($request)) {
+            $user  = User::findOrFail($request->input('user_id'));
+            $token = Auth::login($user);
             $user->loginSecurity->google2fa_enable = 1;
             $user->loginSecurity->save();
-            return response()->json([
-                'success' => true, 
-            ]);
-        }else{
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid verification Code, Please try again.'
-            ]);
+
+            return $this->tokenCreate($token);
         }
+
+        return $this->errorResponse(['error' => 'invalid_otp', 'message' => 'OTP not valid'], Response::HTTP_UNAUTHORIZED);
     }
-    
+
+    /**
+     * Verify OTP
+     */
+    public function verifyOtp(Request $request)
+    {
+        if ($this->cacheOtp($request)) {
+            $user  = User::findOrFail($request->input('user_id'));
+            $token = Auth::login($user);
+
+            return $this->tokenCreate($token);
+        }
+
+        return $this->errorResponse(['error' => 'invalid_otp', 'message' => 'OTP not valid'], Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * Store otp in cache for blacklist
+     */
+    public function cacheOtp(Request $request)
+    {
+        \Log::debug($request->all());
+        $userId  = $request->input('user_id');
+        $otpCode = $request->input('otp_code');
+        $key     = $userId . ':' . $otpCode;
+
+        $user   = User::findOrFail($userId);
+        $secret = Crypt::decrypt($user->loginSecurity->google2fa_secret);
+        $valid  = Google2FA::verifyKey($secret, $otpCode);
+
+        if ($valid) {
+            if (!Cache::has($key)) {
+                Cache::add($key, true, 4); //use cache to store token to blacklist
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Disable 2fa
      */
-    public function disable2fa(Request $request){
+    public function disable2fa(Request $request)
+    {
         if (!(Hash::check($request->get('current_password'), Auth::user()->password))) {
             return response()->json([
                 'success' => false,
@@ -167,12 +246,8 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request)
-    {
-        $authenticator = app(Authenticator::class)->bootStateless($request);
-        if ($authenticator->isAuthenticated()) Google2FA::logout();
-        
-        if (auth()->check()) auth()->logout();  
-        $request->session()->flush();     
+    {   
+        if (Auth::check()) Auth::logout();
 
         return response()->json(['message' => 'Successfully logged out']);
     }
@@ -184,7 +259,7 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->tokenCreate(auth()->refresh(true, true));
+        return $this->tokenCreate(Auth::refresh(true, true));
     }
 
     /**
@@ -197,10 +272,11 @@ class AuthController extends Controller
     protected function tokenCreate($token)
     {
         return response()->json([
-            'token'      => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 1,
-            'user_id'    => auth()->id(),
+            'token'       => $token,
+            'token_type'  => 'bearer',
+            'expires_in'  => Auth::factory()->getTTL() * 1,
+            'user_id'     => Auth::id(),
+            'otp_required' => false,
         ]);
     }
 }

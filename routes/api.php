@@ -21,16 +21,24 @@ use App\Http\Controllers\AccountController;
 //     return $request->user();
 // });
 
+// test middleware
+Route::get('test-middleware', function () {
+    return "2FA middleware work!";
+});
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('logout', 'logout');
     Route::get('refresh', 'refresh');
-    Route::get('me', 'me')->middleware(['auth', 'throttle']);
-    Route::post('generate-secret','generate2faSecret');
-    Route::get('generate-2fa-qr-code', 'generateTwofaQRcode');
-    Route::post('enable-2fa','enable2fa');
-    Route::post('disable-2fa', 'disable2fa');
+    Route::post('verify-otp', 'verifyOtp')->middleware([ 'throttle:5' ]);
+    Route::post('generate-secret', 'generate2faSecret');
+    Route::post('generate-2fa-qr-code', 'generateTwofaQRcode');
+    Route::post('enable-2fa', 'enable2fa');
+    
+    Route::middleware(['auth:api'])->group(function() {
+        Route::post('disable-2fa', 'disable2fa');
+        Route::get('me', 'me');
+    });
 });
 
 Route::controller(AccountController::class)->group(function () {

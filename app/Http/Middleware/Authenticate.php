@@ -7,9 +7,6 @@ use Illuminate\Contracts\Auth\Factory as Auth;
 use Illuminate\Http\Response;
 use Firebase\JWT\JWT;
 use App\Models\Organization;
-use App\Support\Google2FAAuthenticator;
-// use Google2FA;
-use PragmaRX\Google2FALaravel\Support\Authenticator;
 
 class Authenticate
 {
@@ -41,23 +38,6 @@ class Authenticate
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        /**
-         * Checking 2FA 
-         */
-        $authenticator = app(Google2FAAuthenticator::class)->bootStateless($request);
-        // $authenticator = app(Authenticator::class)->bootStateless($request);
-        \Log::debug([$authenticator->isAuthenticated()]);
-        if (  !$authenticator->isAuthenticated()) {
-        // if (auth()->check() && auth()->user()->loginSecurity != null && auth()->user()->loginSecurity->google2fa_enable && !$authenticator->isAuthenticated()) {
-            return response()->json([
-                'error' => [
-                    'message' => 'Opt error',
-                    'code' => 40105,
-                    'status_code' => Response::HTTP_UNAUTHORIZED,
-                ],
-            ], Response::HTTP_UNAUTHORIZED);
-        }
-
         if ($request->header('Authorization') && strpos($request->header('Authorization'), 'JWT') !== false) {
             try {
                 preg_match('/JWT\s((.*)\.(.*)\.(.*))/', $request->header('Authorization'), $jwt);
