@@ -36,8 +36,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('enable-2fa', 'enable2fa');
     
     Route::middleware(['auth:api'])->group(function() {
-        Route::post('disable-2fa', 'disable2fa');
         Route::get('me', 'me');
+        Route::post('disable-2fa', 'disable2fa');
     });
 });
 

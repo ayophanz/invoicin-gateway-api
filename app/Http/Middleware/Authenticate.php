@@ -52,17 +52,19 @@ class Authenticate
                 return response()->json([
                     'error' => [
                         'message' => 'Unauthorized',
-                        'code' => 40104,
+                        'code' => 40101, // Expired token
                         'status_code' => Response::HTTP_UNAUTHORIZED,
                     ],
                 ], Response::HTTP_UNAUTHORIZED);
             }
             
-        } elseif ($this->auth->guard($guard)->guest()) {
+        } 
+        
+        if ($this->auth->guard($guard)->guest()) {
             return response()->json([
                 'error' => [
                     'message' => 'Unauthorized',
-                    'code' => 40104,
+                    'code' => 40102, // Not login
                     'status_code' => Response::HTTP_UNAUTHORIZED,
                 ],
             ], Response::HTTP_UNAUTHORIZED);

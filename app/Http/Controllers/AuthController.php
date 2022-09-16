@@ -68,15 +68,28 @@ class AuthController extends Controller
         }
 
         if ($user->loginSecurity == null) {
-            Auth::logout();
-            return response()->json([
-                'user_id'            => $user->id,
-                'otp_setup_required' => true,
-                'otp_required'       => false
-            ]);
+            return $this->tokenCreate($token, true);
         }
 
         return $this->tokenCreate($token);
+    }
+
+    /**
+     * Get the token array structure.
+     *
+     * @param  string $token
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function tokenCreate($token, $isOtpSetup = false)
+    {
+        return response()->json([
+            'token'              => $token,
+            'token_type'         => 'bearer',
+            'expires_in'         => Auth::factory()->getTTL() * 1,
+            'user_id'            => Auth::id(),
+            'otp_setup_required' => $isOtpSetup,
+        ]);
     }
 
     /**
@@ -87,20 +100,17 @@ class AuthController extends Controller
     public function me()
     {
         $user   = auth()->user();
-        $has2fa = $user->loginSecurity == null ? false : true;
         return response()->json([
             'me' => $user,
-            'has_2fa' => $has2fa,
         ]);
     }
 
     /**
      * Generate 2fa secret key
      */
-    public function generate2faSecret(Request $request)
+    public function generate2faSecret()
     {
-        $userId                           = $request->input('user_id');
-        $user                             = User::findOrFail($userId);
+        $user                             = Auth::user();
         $secret                           = $this->generateSecret();
         $login_security                   = LoginSecurity::firstOrNew(array('user_id' => $user->id));
         $login_security->user_id          = $user->id;
@@ -108,8 +118,11 @@ class AuthController extends Controller
         $login_security->google2fa_secret = Crypt::encrypt($secret);
         $login_security->save();
 
+        Auth::logout();
         return response()->json([
-            'success' => true
+            'user_id'            => $user->id,
+            'otp_setup_required' => true,
+            'otp_required'       => false
         ]);
     }
 
@@ -171,7 +184,7 @@ class AuthController extends Controller
             return $this->tokenCreate($token);
         }
 
-        return $this->errorResponse(['error' => 'invalid_otp', 'message' => 'OTP not valid'], Response::HTTP_UNAUTHORIZED);
+        return $this->errorResponse(['otp_code' => ['OTP not valid']], Response::HTTP_UNAUTHORIZED);
     }
 
     /**
@@ -179,6 +192,12 @@ class AuthController extends Controller
      */
     public function verifyOtp(Request $request)
     {
+        $toValidate = [
+            'otp_code' => 'required',
+        ];
+        $validator = Validator::make($request->all(), $toValidate);
+        if ($validator->fails()) return $this->errorResponse($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+
         if ($this->cacheOtp($request)) {
             $user  = User::findOrFail($request->input('user_id'));
             $token = Auth::login($user);
@@ -186,7 +205,7 @@ class AuthController extends Controller
             return $this->tokenCreate($token);
         }
 
-        return $this->errorResponse(['error' => 'invalid_otp', 'message' => 'OTP not valid'], Response::HTTP_UNAUTHORIZED);
+        return $this->errorResponse(['otp_code' => ['OTP not valid']], Response::HTTP_UNAUTHORIZED);
     }
 
     /**
@@ -194,7 +213,6 @@ class AuthController extends Controller
      */
     public function cacheOtp(Request $request)
     {
-        \Log::debug($request->all());
         $userId  = $request->input('user_id');
         $otpCode = $request->input('otp_code');
         $key     = $userId . ':' . $otpCode;
@@ -260,23 +278,5 @@ class AuthController extends Controller
     public function refresh()
     {
         return $this->tokenCreate(Auth::refresh(true, true));
-    }
-
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function tokenCreate($token)
-    {
-        return response()->json([
-            'token'       => $token,
-            'token_type'  => 'bearer',
-            'expires_in'  => Auth::factory()->getTTL() * 1,
-            'user_id'     => Auth::id(),
-            'otp_required' => false,
-        ]);
     }
 }
