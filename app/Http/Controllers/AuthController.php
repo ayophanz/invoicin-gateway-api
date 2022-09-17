@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LoginSecurity;
 use App\Models\User;
 use App\Traits\ApiResponser;
+use App\Jobs\ForgotPasswordJob;
 use \ParagonIE\ConstantTime\Base32;
 use Google2FA;
 use Hash;
@@ -54,11 +55,11 @@ class AuthController extends Controller
 
         $token = Auth::attempt($credentials);
         if (!$token) {
-            $this->errorResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            return $this->errorResponse(['message' => 'Invalid Password or Email'], Response::HTTP_UNAUTHORIZED);
         }
 
         $user = Auth::user();
-        if ($user->loginSecurity && $user->loginSecurity->google2fa_enable) {
+        if (Auth::check() && $user->loginSecurity && $user->loginSecurity->google2fa_enable) {
             Auth::logout();
             return response()->json([
                 'user_id'            => $user->id,
@@ -67,7 +68,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if ($user->loginSecurity == null) {
+        if (Auth::check() && $user->loginSecurity == null) {
             return $this->tokenCreate($token, true);
         }
 
@@ -267,7 +268,7 @@ class AuthController extends Controller
     {   
         if (Auth::check()) Auth::logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return $this->successResponse(['message' => 'Successfully logged out']);
     }
 
     /**
@@ -278,5 +279,27 @@ class AuthController extends Controller
     public function refresh()
     {
         return $this->tokenCreate(Auth::refresh(true, true));
+    }
+
+    /**
+     * forgot password
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function forgotPassword(Request $request)
+    {
+        $toValidate = [
+            'email' => 'required|email',
+        ];
+        $validator = Validator::make($request->all(), $toValidate);
+        if ($validator->fails()) return $this->errorResponse($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) return $this->errorResponse(['email' => ['This email doesn\'t exist.']], Response::HTTP_UNAUTHORIZED);
+
+        ForgotPasswordJob::dispatch($user);
+
+        return $this->successResponse(['message' => 'Reset link successfully']);
     }
 }

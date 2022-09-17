@@ -34,6 +34,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('generate-secret', 'generate2faSecret');
     Route::post('generate-2fa-qr-code', 'generateTwofaQRcode');
     Route::post('enable-2fa', 'enable2fa');
+    Route::post('forgot-password', 'forgotPassword');
     
     Route::middleware(['auth:api'])->group(function() {
         Route::get('me', 'me');
