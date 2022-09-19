@@ -21,11 +21,6 @@ use App\Http\Controllers\AccountController;
 //     return $request->user();
 // });
 
-// test middleware
-Route::get('test-middleware', function () {
-    return "2FA middleware work!";
-});
-
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('logout', 'logout');

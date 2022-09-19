@@ -6,12 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Models\LoginSecurity;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use App\Jobs\ForgotPasswordJob;
 use \ParagonIE\ConstantTime\Base32;
+use Carbon\Carbon; 
+use DB;
 use Google2FA;
 use Hash;
 use Auth;
@@ -30,11 +33,6 @@ class AuthController extends Controller
     public function __construct()
     {
        //
-    }
-
-    public function test_middleware()
-    {
-        return '2fa working';
     }
 
     /**
@@ -282,7 +280,7 @@ class AuthController extends Controller
     }
 
     /**
-     * forgot password
+     * Forgot password
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -294,12 +292,63 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), $toValidate);
         if ($validator->fails()) return $this->errorResponse($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        $user = User::where('email', $request->email)->first();
+        $user  = User::where('email', $request->email)->first();
+        $token = Str::random(64);
+
+        DB::table('password_resets')->where('email', $request->email)->delete();
+        DB::table('password_resets')->insert([
+            'email' => $request->email, 
+            'token' => $token, 
+            'created_at' => Carbon::now()
+        ]);
 
         if (!$user) return $this->errorResponse(['email' => ['This email doesn\'t exist.']], Response::HTTP_UNAUTHORIZED);
 
-        ForgotPasswordJob::dispatch($user);
+        ForgotPasswordJob::dispatch($user, $token);
 
         return $this->successResponse(['message' => 'Reset link successfully']);
+    }
+
+    /**
+     * Password Reset Link
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function passwordResetLink(Request $request, $token)
+    {
+        $passwordReset = DB::table('password_resets')
+            ->where([
+                'token' => $token
+            ])->first();
+        
+        if (!$passwordReset) {
+            return 'Invalid or Expired link';
+        }
+
+      return view('resetPassword', ['token' => $token]);
+    }
+
+    /**
+     * Reset Password
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resetPassword(Request $request, $token)
+    {
+        $passwordReset = DB::table('password_resets')
+            ->where([
+                'token' => $token
+            ])
+        ->first();
+
+        if (!$passwordReset) {
+            return 'Invalid or Expired link';
+        }
+
+        User::where('email', $passwordReset->email)->update([
+            'password' => bcrypt($request->new_password)
+        ]);
+
+        return 'Success';
     }
 }
