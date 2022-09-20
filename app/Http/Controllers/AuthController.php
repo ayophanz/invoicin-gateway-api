@@ -20,6 +20,7 @@ use Hash;
 use Auth;
 use Crypt;
 use Session;
+use Redirect;
 
 class AuthController extends Controller
 {
@@ -335,20 +336,20 @@ class AuthController extends Controller
      */
     public function resetPassword(Request $request, $token)
     {
-        $passwordReset = DB::table('password_resets')
-            ->where([
-                'token' => $token
-            ])
-        ->first();
+        $toValidate = [
+            'password' => 'required|confirmed|min:6',
+        ];
+        $validator = Validator::make($request->all(), $toValidate);
+        if ($validator->fails()) return view('resetPassword', ['errors' => $validator->errors(), 'token' => $token]);
 
-        if (!$passwordReset) {
-            return 'Invalid or Expired link';
-        }
+        $passwordReset = DB::table('password_resets')->where('token', $token)->first();
+        if (!$passwordReset) return 'Invalid or Expired link';
 
         User::where('email', $passwordReset->email)->update([
-            'password' => bcrypt($request->new_password)
+            'password' => bcrypt($request->password)
         ]);
+        DB::table('password_resets')->where('email', $passwordReset->email)->delete();
 
-        return 'Success';
+        return view('resetPasswordSuccess');
     }
 }

@@ -12,19 +12,22 @@
 
             <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                    <form class="space-y-6" action="#" method="POST">
+                    @if($errors->any())
+                        {!! implode('', $errors->all('<div class="text-red-400">:message</div>')) !!}
+                    @endif
+                    <form class="space-y-6" action="{{ url('password-reset-link') . '/' . $token  }}" method="POST">
                         @csrf
                         <div>
-                            <label for="newPassword" class="block text-sm font-medium text-gray-700">New Password</label>
+                            <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
                             <div class="mt-1">
-                            <input id="newPassword" name="newPassword" type="password" required class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 sm:text-sm">
+                                <input id="password" name="password" type="password" required class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 sm:text-sm">
                             </div>
                         </div>
             
                         <div>
-                            <label for="confirmNewPassword" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
                             <div class="mt-1">
-                            <input id="confirmNewPassword" name="confirmNewPassword" type="password" required class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-smsm:text-sm">
+                                <input id="password_confirmation" name="password_confirmation" type="password" required class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm sm:text-sm">
                             </div> 
                         </div>
             

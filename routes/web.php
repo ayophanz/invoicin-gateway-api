@@ -20,5 +20,5 @@ Route::get('/', function () {
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('password-reset-link/{token}', 'passwordResetLink');
-    Route::post('password-reset-link/{token}', 'passwordResetLink');
+    Route::post('password-reset-link/{token}', 'resetPassword');
 });
