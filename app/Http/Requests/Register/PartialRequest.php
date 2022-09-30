@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Register;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\BaseRequest;
 
-class PartialRequest extends Request
+class PartialRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,33 +22,33 @@ class PartialRequest extends Request
      *
      * @return array
      */
-    public function rules()
+    public function rules(Request $request)
     {
-        // if ($request->form_type == 'user') {
-        //     return [
-        //         'firstname' => 'required',
-        //         'lastname'  => 'required',
-        //         'email'     => 'required|email',
-        //         'password'  => 'required|confirmed|min:6',
-        //     ];
-        // }
+        if ($request->form_type == 'user') {
+            return [
+                'firstname' => 'required',
+                'lastname'  => 'required',
+                'email'     => 'required|email',
+                'password'  => 'required|confirmed|min:6',
+            ];
+        }
 
-        // if ($request->form_type == 'org') {
-        //     return [
-        //         'type'  => 'required',
-        //         'name'  => 'required',
-        //         'email' => 'required|email',
-        //     ];
-        // }
+        if ($request->form_type == 'org') {
+            return [
+                'type'  => 'required',
+                'name'  => 'required',
+                'email' => 'required|email',
+            ];
+        }
 
-        // if ($request->form_type == 'orgBillingAddress') {
-        //     return [
-        //         'address' => 'required',
-        //         'city'    => 'required',
-        //         'zipcode' => 'required|numeric',
-        //         'country' => 'required|numeric'
-        //     ];
-        // }
+        if ($request->form_type == 'orgBillingAddress') {
+            return [
+                'address' => 'required',
+                'city'    => 'required',
+                'zipcode' => 'required|numeric',
+                'country' => 'required|numeric'
+            ];
+        }
 
         return [];
     }
