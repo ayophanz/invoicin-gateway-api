@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
+use App\Http\Requests\Register\PartialRequest;
 use Auth;
 
 class AccountController extends Controller
@@ -134,5 +135,17 @@ class AccountController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    /**
+     * Validate partial registration request.
+     *
+     * @param  \Illuminate\Http\PartialRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function formValidate(PartialRequest $request)
+    {
+        \Log::debug($request->all());
+        return response()->json(['success' => true]);
     }
 }

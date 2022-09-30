@@ -39,7 +39,7 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::controller(AccountController::class)->group(function () {
     Route::post('account/store', 'store');
-    Route::post('account/register/validate/{type}', 'register');
+    Route::post('account/register/validate', 'formValidate');
 });
 
 Route::fallback(function () {
