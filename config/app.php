@@ -176,7 +176,7 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         PragmaRX\Google2FALaravel\ServiceProvider::class,
-
+        Intervention\Image\ImageServiceProvider::class,
     ],
 
     /*
@@ -233,7 +233,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         'Google2FA' => PragmaRX\Google2FALaravel\Facade::class,
-
+        'Image' => Intervention\Image\Facades\Image::class,
     ],
 
 ];

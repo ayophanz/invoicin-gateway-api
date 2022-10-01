@@ -35,9 +35,9 @@ class PartialRequest extends BaseRequest
 
         if ($request->form_type == 'org') {
             return [
-                'type'  => 'required',
-                'name'  => 'required',
-                'email' => 'required|email',
+                'type'     => 'required',
+                'name'     => 'required',
+                'orgEmail' => 'required|email',
             ];
         }
 
@@ -46,10 +46,22 @@ class PartialRequest extends BaseRequest
                 'address' => 'required',
                 'city'    => 'required',
                 'zipcode' => 'required|numeric',
-                'country' => 'required|numeric'
+                'country' => 'required|numeric',
             ];
         }
 
-        return [];
+        return [
+            'firstname' => 'required',
+            'lastname'  => 'required',
+            'email'     => 'required|email',
+            'password'  => 'required|confirmed|min:6',
+            'type'      => 'required',
+            'name'      => 'required',
+            'orgEmail'  => 'required|email',
+            'address'   => 'required',
+            'city'      => 'required',
+            'zipcode'   => 'required|numeric',
+            'country'   => 'required|numeric'
+        ];
     }
 }

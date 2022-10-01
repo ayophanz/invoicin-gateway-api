@@ -104,8 +104,8 @@ class OrganizationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function countries()
+    public function countries(Request $request)
     {
-        //
+        return $this->organizationService->fetchOrgCountries($request);
     }
 }

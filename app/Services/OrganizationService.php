@@ -28,6 +28,10 @@ class OrganizationService
     {
         return $this->forwardRequest('/api/organization/store', $request);
     }
+    public function fetchOrgCountries(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/countries', $request);
+    }
 
     /** Organization settings */
     public function storeSetting(Request $request)

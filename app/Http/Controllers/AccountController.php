@@ -10,6 +10,7 @@ use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
 use App\Http\Requests\Register\PartialRequest;
 use Auth;
+use Image;
 
 class AccountController extends Controller
 {
@@ -49,22 +50,25 @@ class AccountController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\PartialRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PartialRequest $request)
     {
         if (Auth::check()) Auth::logout();
         \DB::beginTransaction();
         try {
             /** Create account */
             $user             = new User();
-            $user->first_name = $request->first_name;
-            $user->last_name  = $request->last_name;
+            $user->first_name = $request->firstname;
+            $user->last_name  = $request->lastname;
             $user->email      = $request->email;
             $user->password   = bcrypt($request->password);
             $user->save();
-            \DB::commit();
+
+            $profile = 'profile'.'.jpg';
+            $path = storage_path() . '/app/files/user_' . $user->id. '/profile/' . $profile;
+            Image::make($request->image[0])->save($path);  
 
             $credentials = request(['email', 'password']);
             if ($token = auth()->attempt($credentials)) {
@@ -145,7 +149,6 @@ class AccountController extends Controller
      */
     public function formValidate(PartialRequest $request)
     {
-        \Log::debug($request->all());
         return response()->json(['success' => true]);
     }
 }

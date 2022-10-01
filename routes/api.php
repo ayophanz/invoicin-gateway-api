@@ -38,8 +38,8 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::controller(AccountController::class)->group(function () {
-    Route::post('account/store', 'store');
     Route::post('account/register/validate', 'formValidate');
+    Route::post('account/register/store', 'store');
 });
 
 Route::fallback(function () {
