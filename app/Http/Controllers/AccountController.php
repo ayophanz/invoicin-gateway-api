@@ -66,7 +66,7 @@ class AccountController extends Controller
             $user->password   = bcrypt($request->password);
             $user->save();
 
-            $profile = 'profile'.'.jpg';
+            $profile = 'profile.jpg';
             $path = storage_path() . '/app/files/user_' . $user->id. '/profile/' . $profile;
             Image::make($request->image[0])->save($path);  
 
