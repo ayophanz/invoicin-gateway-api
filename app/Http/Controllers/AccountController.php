@@ -67,8 +67,9 @@ class AccountController extends Controller
             $user->save();
 
             $profile = 'profile.jpg';
-            $path = storage_path() . '/app/files/user_' . $user->id. '/profile/' . $profile;
-            Image::make($request->image[0])->save($path);  
+            $path = storage_path() . '/app/files/user_' . $user->id. '/profile/';
+            \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
+            Image::make($request->image[0])->save($path . $profile);  
 
             $credentials = request(['email', 'password']);
             if ($token = auth()->attempt($credentials)) {
