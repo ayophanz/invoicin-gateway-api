@@ -65,11 +65,14 @@ class AccountController extends Controller
             $user->email      = $request->email;
             $user->password   = bcrypt($request->password);
             $user->save();
+            \DB::commit();
 
-            $profile = 'profile.jpg';
-            $path = storage_path() . '/app/files/user_' . $user->id. '/profile/';
-            \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
-            Image::make($request->image[0])->save($path . $profile);  
+            if (count($request->image) > 0) {
+                $profile = 'profile.jpg';
+                $path = storage_path() . '/app/files/user_' . $user->id. '/profile/';
+                \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
+                Image::make($request->image[0])->save($path . $profile);
+            }
 
             $credentials = request(['email', 'password']);
             if ($token = auth()->attempt($credentials)) {
@@ -78,9 +81,8 @@ class AccountController extends Controller
                 $request->headers->set('Authorization', 'Bearer ' . $token);
                 $payload      = $this->organizationService->storeOrganization($request);
                 $content      = json_decode($payload->getContent(), true);
-                $organization = $content;
                 $user->update([
-                    'organization_id' => $organization['data']['uuid']
+                    'organization_id' => $content['data']['uuid']
                 ]);
 
                 return response()->json([
