@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
-use App\Http\Requests\Register\PartialRequest;
+use App\Http\Requests\Register\StoreRequest;
 use Auth;
 use Image;
 
@@ -50,10 +50,10 @@ class AccountController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\PartialRequest  $request
+     * @param  \Illuminate\Http\StoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(PartialRequest $request)
+    public function store(StoreRequest $request)
     {
         if (Auth::check()) Auth::logout();
         \DB::beginTransaction();
@@ -86,9 +86,11 @@ class AccountController extends Controller
                 ]);
 
                 return response()->json([
-                    'access_token' => $token,
-                    'token_type' => 'bearer',
-                    'expires_in' => auth()->factory()->getTTL() * 60
+                    'token'              => $token,
+                    'token_type'         => 'bearer',
+                    'expires_in'         => Auth::factory()->getTTL() * 1,
+                    'user_id'            => Auth::id(),
+                    'otp_setup_required' => false,
                 ]);
                 \DB::commit();
             }
@@ -147,10 +149,10 @@ class AccountController extends Controller
     /**
      * Validate partial registration request.
      *
-     * @param  \Illuminate\Http\PartialRequest $request
+     * @param  \Illuminate\Http\StoreRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function formValidate(PartialRequest $request)
+    public function formValidate(StoreRequest $request)
     {
         return response()->json(['success' => true]);
     }

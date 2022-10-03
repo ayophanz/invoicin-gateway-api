@@ -8,6 +8,7 @@
         "php": "^7.3|^8.0",
         "bacon/bacon-qr-code": "^2.0",
         "beyondcode/laravel-websockets": "^1.13",
+        "crazybooot/base64-validation": "^1.0",
         "firebase/php-jwt": "^5.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",

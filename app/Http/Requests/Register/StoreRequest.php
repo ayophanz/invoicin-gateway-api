@@ -5,7 +5,7 @@ namespace App\Http\Requests\Register;
 use Illuminate\Http\Request;
 use App\Http\Requests\BaseRequest;
 
-class PartialRequest extends BaseRequest
+class StoreRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,15 +26,17 @@ class PartialRequest extends BaseRequest
     {
         if ($request->form_type == 'user') {
             return [
+                'image.*'   => 'base64size:1MB|base64mimes:png,jpg,jpeg',
                 'firstname' => 'required',
                 'lastname'  => 'required',
-                'email'     => 'required|email',
+                'email'     => 'required|email|unique:users,email',
                 'password'  => 'required|confirmed|min:6',
             ];
         }
 
         if ($request->form_type == 'org') {
             return [
+                'logo.*'   => 'base64size:1MB|base64mimes:png,jpg,jpeg',
                 'type'     => 'required',
                 'name'     => 'required',
                 'orgEmail' => 'required|email',
@@ -51,11 +53,13 @@ class PartialRequest extends BaseRequest
         }
 
         return [
+            'image.*'   => 'base64size:1MB|base64mimes:png,jpg,jpeg',
             'firstname' => 'required',
             'lastname'  => 'required',
             'email'     => 'required|email',
             'password'  => 'required|confirmed|min:6',
             'type'      => 'required',
+            'logo.*'    => 'base64size:1MB|base64mimes:png,jpg,jpeg',
             'name'      => 'required',
             'orgEmail'  => 'required|email',
             'address'   => 'required',
