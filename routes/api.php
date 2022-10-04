@@ -38,7 +38,8 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::controller(AccountController::class)->group(function () {
-    Route::post('account/register/validate', 'formValidate');
+    Route::post('account/register/user/validate', 'userValidate');
+    Route::post('account/register/org/validate', 'orgValidate');
     Route::post('account/register/store', 'store');
 });
 

@@ -48,6 +48,28 @@ class AccountController extends Controller
     }
 
     /**
+     * Validate user registration request.
+     *
+     * @param  \Illuminate\Http\StoreRequest $request
+     * @return \Illuminate\Http\Response
+     */
+    public function userValidate(StoreRequest $request)
+    {
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Validate org registration request.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orgValidate(Request $request)
+    {
+        return $this->organizationService->validateOrganization($request);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\StoreRequest  $request
@@ -144,16 +166,5 @@ class AccountController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    /**
-     * Validate partial registration request.
-     *
-     * @param  \Illuminate\Http\StoreRequest $request
-     * @return \Illuminate\Http\Response
-     */
-    public function formValidate(StoreRequest $request)
-    {
-        return response()->json(['success' => true]);
     }
 }

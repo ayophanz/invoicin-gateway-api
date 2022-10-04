@@ -26,7 +26,7 @@ class StoreRequest extends BaseRequest
     {
         if ($request->form_type == 'user') {
             return [
-                'image.*'   => 'base64size:1MB|base64mimes:png,jpg,jpeg',
+                'image.*'   => 'base64mimes:png,jpg,jpeg',
                 'firstname' => 'required',
                 'lastname'  => 'required',
                 'email'     => 'required|email|unique:users,email',
@@ -65,7 +65,7 @@ class StoreRequest extends BaseRequest
             'address'   => 'required',
             'city'      => 'required',
             'zipcode'   => 'required|numeric',
-            'country'   => 'required|numeric'
+            'country'   => 'required|numeric',
         ];
     }
 }
