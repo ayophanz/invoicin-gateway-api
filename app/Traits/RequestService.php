@@ -19,30 +19,6 @@ trait RequestService
     private array $multipartParams = [];
     private bool $addQuery = true;
 
-    public function request($method, $requestUrl, $formParams = [], $headers = [])
-    {
-        $client = new Client([
-            'base_uri' => $this->baseUri,
-        ]);
-        if ($jwt = $this->generateJWT()) {
-            $headers['Authorization'] = 'Bearer '.$jwt;
-        }
-        try {
-            $response = $client->request(
-                $method,
-                $requestUrl,
-                [
-                    'form_params' => $formParams,
-                    'headers' => $headers,
-                ]
-            );
-        } catch (ClientException $e) {
-            $response = $e->getResponse();
-            return $this->errorMessage($response->getBody()->getContents(), $response->getStatusCode());
-        }
-        return $this->successResponse($response->getBody()->getContents(), $response->getStatusCode());
-    }
-
     public function forwardRequest($requestUrl, Request $request)
     {
         $this->originalRequest = $request;
@@ -105,7 +81,7 @@ trait RequestService
                     return $request->withOptions(['form_params' => $params])
                         ->post($url);
                 }
-
+                
                 return $request->post($url, $params);
             case 'GET':
             default:
