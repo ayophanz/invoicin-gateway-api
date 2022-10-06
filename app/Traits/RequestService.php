@@ -81,7 +81,7 @@ trait RequestService
                     return $request->withOptions(['form_params' => $params])
                         ->post($url);
                 }
-                
+
                 return $request->post($url, $params);
             case 'GET':
             default:

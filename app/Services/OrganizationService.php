@@ -24,7 +24,6 @@ class OrganizationService
     {
         return $this->forwardRequest('/api/organization/validate', $request);
     }
-
     public function fetchOrganization(Request $request)
     {
         return $this->forwardRequest('/api/organization/show', $request);
