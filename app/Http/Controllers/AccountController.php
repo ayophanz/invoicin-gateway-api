@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\Organization;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
 use App\Http\Requests\Register\StoreRequest;
+use App\Events\RegisteredEvent;
 use Auth;
 use Image;
 
@@ -103,9 +105,10 @@ class AccountController extends Controller
                 $request->headers->set('Authorization', 'Bearer ' . $token);
                 $payload      = $this->organizationService->storeOrganization($request);
                 $content      = json_decode($payload->getContent(), true);
-                $user->update([
-                    'organization_id' => $content['data']['uuid']
-                ]);
+                $organization = new Organization([], collect($content['data'])->only(['uuid', 'name', 'type', 'email'])->toArray());
+                
+                $user->update([ 'organization_id' => $organization->uuid ]);
+                RegisteredEvent::dispatch($user, $organization);
 
                 return response()->json([
                     'token'              => $token,
