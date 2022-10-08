@@ -16,6 +16,9 @@ class RegisteredEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $user;
+    public $organization;
+
     /**
      * Create a new event instance.
      *
@@ -23,16 +26,7 @@ class RegisteredEvent
      */
     public function __construct(User $user, Organization $organization)
     {
-        //
-    }
-
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
-     */
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
+        $this->user         = $user;
+        $this->organization = $organization;
     }
 }

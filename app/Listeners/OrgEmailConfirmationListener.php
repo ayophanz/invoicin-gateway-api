@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\RegisteredEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use App\Jobs\OrgConfirmationJob;
 
 class OrgEmailConfirmationListener
 {
@@ -26,6 +27,6 @@ class OrgEmailConfirmationListener
      */
     public function handle(RegisteredEvent $event)
     {
-        \Log::debug($event->organization);
+        OrgConfirmationJob::dispatch($event->organization);
     }
 }

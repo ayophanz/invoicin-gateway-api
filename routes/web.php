@@ -22,3 +22,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('password-reset-link/{token}', 'passwordResetLink');
     Route::post('password-reset-link/{token}', 'resetPassword');
 });
+
+Route::controller(AccountController::class)->group(function () {
+    Route::post('verify-user/{token}', 'verifyUser');
+    Route::post('verify-organization/{token}', 'verifyOrganization');
+});

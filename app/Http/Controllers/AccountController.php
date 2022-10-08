@@ -13,6 +13,8 @@ use App\Http\Requests\Register\StoreRequest;
 use App\Events\RegisteredEvent;
 use Auth;
 use Image;
+use Carbon\Carbon;
+use Hashids\Hashids;
 
 class AccountController extends Controller
 {
@@ -110,13 +112,13 @@ class AccountController extends Controller
                 $user->update([ 'organization_id' => $organization->uuid ]);
                 RegisteredEvent::dispatch($user, $organization);
 
-                return response()->json([
-                    'token'              => $token,
-                    'token_type'         => 'bearer',
-                    'expires_in'         => Auth::factory()->getTTL() * 1,
-                    'user_id'            => Auth::id(),
-                    'otp_setup_required' => false,
-                ]);
+                // return response()->json([
+                //     'token'              => $token,
+                //     'token_type'         => 'bearer',
+                //     'expires_in'         => Auth::factory()->getTTL() * 1,
+                //     'user_id'            => Auth::id(),
+                //     'otp_setup_required' => false,
+                // ]);
                 \DB::commit();
             }
         } catch(\Exception $e) {
@@ -169,5 +171,26 @@ class AccountController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function verifyUser($token)
+    {
+        $hashids   = new Hashids();
+        $decodedID = $hashids->decode($token);
+
+        $user = User::find($decodedID);
+        if ($user->email_verified_at != null) {
+            return $this->successResponse(['Status' => 'Already verified'], Response::HTTP_OK);
+        }
+
+        $user->email_verified_at = Carbon::now();
+        $user->save();
+        return $this->successResponse(['Status' => 'Verified'], Response::HTTP_OK);
+    }
+
+    public function verifyOrganization(Request $request, $token)
+    {
+        $request->merge(['token' => $token]);
+        return $this->organizationService->verifyOrganization($request);
     }
 }
