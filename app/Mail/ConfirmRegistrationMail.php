@@ -7,23 +7,23 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
-use App\Models\Organization;
+use App\Models\User;
 use Hashids\Hashids;
 
-class OrgConfirmationMail extends Mailable
+class ConfirmRegistrationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $organization;
+    protected $user;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Organization $organization)
+    public function __construct(User $user)
     {
-        $this->organization = $organization;
+        $this->user = $user;
     }
 
     /**
@@ -35,10 +35,10 @@ class OrgConfirmationMail extends Mailable
     {
         $secretKey  = Str::random(40);
         $hashids    = new Hashids($secretKey);
-        $verifyLink = $hashids->encode($this->organization->uuid);
+        $verifyLink = $hashids->encode($this->user->id);
 
-        return $this->subject('Verify Organization')
+        return $this->subject('Verify User')
             ->with([ 'verify_link' => $verifyLink ])
-            ->markdown('emails.orgConfirmationMail');
+            ->markdown('emails.confirmRegistrationMail');
     }
 }

@@ -102,16 +102,17 @@ class AccountController extends Controller
 
             $credentials = request(['email', 'password']);
             if ($token = auth()->attempt($credentials)) {
-                
+
                 /** Save the organization */
                 $request->headers->set('Authorization', 'Bearer ' . $token);
                 $payload      = $this->organizationService->storeOrganization($request);
                 $content      = json_decode($payload->getContent(), true);
                 $organization = new Organization([], collect($content['data'])->only(['uuid', 'name', 'type', 'email'])->toArray());
                 
-                $user->update([ 'organization_id' => $organization->uuid ]);
-                RegisteredEvent::dispatch($user, $organization);
+                $user->organization_id = $organization->uuid;
+                $user->save();
 
+                RegisteredEvent::dispatch($user);
                 // return response()->json([
                 //     'token'              => $token,
                 //     'token_type'         => 'bearer',

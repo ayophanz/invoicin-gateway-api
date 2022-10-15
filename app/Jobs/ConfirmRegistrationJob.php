@@ -8,23 +8,24 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Organization;
-use App\Mail\OrgConfirmationMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
+use App\Mail\ConfirmRegistrationMail;
 
-class OrgConfirmationJob implements ShouldQueue
+class ConfirmRegistrationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $organization;
+    protected $user;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Organization $organization)
+    public function __construct(User $user)
     {
-        $this->organization = $organization;
+        $this->user = $user;
     }
 
     /**
@@ -34,6 +35,6 @@ class OrgConfirmationJob implements ShouldQueue
      */
     public function handle()
     {
-        Mail::to($this->organization->email)->send(new UserConfirmationMail($this->organization));
+        Mail::to($this->user->email)->send(new ConfirmRegistrationMail($this->user));
     }
 }
