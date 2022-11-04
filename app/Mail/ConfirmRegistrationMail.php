@@ -35,7 +35,7 @@ class ConfirmRegistrationMail extends Mailable
     {
         $secretKey  = Str::random(40);
         $hashids    = new Hashids($secretKey);
-        $verifyLink = $hashids->encode($this->user->id);
+        $verifyLink = url('/verify-user/' . $hashids->encode($this->user->id));
 
         return $this->subject('Verify User')
             ->with([ 'verify_link' => $verifyLink ])

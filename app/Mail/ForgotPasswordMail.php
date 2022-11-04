@@ -13,7 +13,7 @@ class ForgotPasswordMail extends Mailable
     use Queueable, SerializesModels;
 
     protected $user;
-    protected $resetLink;
+    protected $token;
     /**
      * Create a new message instance.
      *
@@ -21,8 +21,8 @@ class ForgotPasswordMail extends Mailable
      */
     public function __construct(User $user, $token)
     {
-        $this->user = $user;
-        $this->resetLink = config('app.url') . '/password-reset-link/'. $token;
+        $this->user  = $user;
+        $this->token = $token;
     }
 
     /**
@@ -32,8 +32,9 @@ class ForgotPasswordMail extends Mailable
      */
     public function build()
     {
+        $resetLink = url('/password-reset-link/'. $this->token);
         return $this->subject('Reset Password')
-            ->with([ 'reset_link' => $this->resetLink ])
+            ->with([ 'reset_link' => $resetLink ])
             ->markdown('emails.forgotPasswordMail');
     }
 }

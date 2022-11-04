@@ -174,6 +174,11 @@ class AccountController extends Controller
         //
     }
 
+    public function verifyUserLink($token)
+    {
+      return view('verifyUser', ['token' => $token]);
+    }
+
     public function verifyUser($token)
     {
         $hashids   = new Hashids();
@@ -187,6 +192,11 @@ class AccountController extends Controller
         $user->email_verified_at = Carbon::now();
         $user->save();
         return $this->successResponse(['Status' => 'Verified'], Response::HTTP_OK);
+    }
+
+    public function verifyOrganizationLink($token)
+    {
+      return view('verifyOrganization', ['token' => $token]);
     }
 
     public function verifyOrganization(Request $request, $token)
