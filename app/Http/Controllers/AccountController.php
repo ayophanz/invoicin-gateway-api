@@ -181,17 +181,19 @@ class AccountController extends Controller
 
     public function verifyUser($token)
     {
-        $hashids   = new Hashids();
+        $hashids   = new Hashids('secretkey', 12);
         $decodedID = $hashids->decode($token);
+        \Log::debug($decodedID);
+        \Log::debug($token);
 
-        $user = User::find($decodedID);
-        if ($user->email_verified_at != null) {
-            return $this->successResponse(['Status' => 'Already verified'], Response::HTTP_OK);
-        }
+        // $user = User::find($decodedID);
+        // if ($user->email_verified_at != null) {
+        //     return $this->successResponse(['Status' => 'Already verified'], Response::HTTP_OK);
+        // }
 
-        $user->email_verified_at = Carbon::now();
-        $user->save();
-        return $this->successResponse(['Status' => 'Verified'], Response::HTTP_OK);
+        // $user->email_verified_at = Carbon::now();
+        // $user->save();
+        // return $this->successResponse(['Status' => 'Verified'], Response::HTTP_OK);
     }
 
     public function verifyOrganizationLink($token)
@@ -201,7 +203,11 @@ class AccountController extends Controller
 
     public function verifyOrganization(Request $request, $token)
     {
-        $request->merge(['token' => $token]);
-        return $this->organizationService->verifyOrganization($request);
+        $hashids   = new Hashids('secretkey', 12);
+        $decodedID = $hashids->decodeHex($token);
+        \Log::debug($decodedID);
+
+        // $request->merge(['id' => $decodedID]);
+        // return $this->organizationService->verifyOrganization($request);
     }
 }

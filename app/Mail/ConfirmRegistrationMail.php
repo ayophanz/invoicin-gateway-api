@@ -6,7 +6,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Str;
 use App\Models\User;
 use Hashids\Hashids;
 
@@ -33,8 +32,7 @@ class ConfirmRegistrationMail extends Mailable
      */
     public function build()
     {
-        $secretKey  = Str::random(40);
-        $hashids    = new Hashids($secretKey);
+        $hashids    = new Hashids('secretkey', 12);
         $verifyLink = url('/verify-user/' . $hashids->encode($this->user->id));
 
         return $this->subject('Verify User')
