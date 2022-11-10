@@ -99,7 +99,7 @@ class AuthController extends Controller
      */
     public function me()
     {
-        $user   = auth()->user();
+        $user = auth()->user();
         return response()->json([
             'me' => $user,
         ]);
