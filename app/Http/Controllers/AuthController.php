@@ -12,6 +12,7 @@ use App\Models\LoginSecurity;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use App\Jobs\ForgotPasswordJob;
+use App\Services\OrganizationService;
 use \ParagonIE\ConstantTime\Base32;
 use Carbon\Carbon; 
 use DB;
@@ -25,15 +26,16 @@ use Redirect;
 class AuthController extends Controller
 {
     use ApiResponser;
+    protected $organizationService;
 
     /**
      * Create a new AuthController instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(OrganizationService $organizationService)
     {
-       //
+        $this->organizationService = $organizationService;
     }
 
     /**
@@ -97,9 +99,15 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function me()
+    public function me(Request $request)
     {
         $user = auth()->user();
+        $payload      = $this->organizationService->fetchOrganization($request);
+        $organization = json_decode($payload->getContent(), true);
+        $user->organization_name = $organization['data']['name'];
+        $user->organization_email = $organization['data']['email'];
+        $user->organization_email_verified_at = $organization['data']['email_verified_at'];
+        
         return response()->json([
             'me' => $user,
         ]);

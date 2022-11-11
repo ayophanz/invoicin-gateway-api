@@ -107,26 +107,19 @@ class AccountController extends Controller
                 $request->headers->set('Authorization', 'Bearer ' . $token);
                 $payload      = $this->organizationService->storeOrganization($request);
                 $content      = json_decode($payload->getContent(), true);
-                $organization = new Organization([], collect($content['data'])->only(['uuid', 'name', 'type', 'email'])->toArray());
+                $organization = new Organization([], collect($content['data'])->only(['uuid'])->toArray());
                 
                 $user->organization_id = $organization->uuid;
                 $user->save();
 
                 RegisteredEvent::dispatch($user);
-                // return response()->json([
-                //     'token'              => $token,
-                //     'token_type'         => 'bearer',
-                //     'expires_in'         => Auth::factory()->getTTL() * 1,
-                //     'user_id'            => Auth::id(),
-                //     'otp_setup_required' => false,
-                // ]);
                 \DB::commit();
             }
         } catch(\Exception $e) {
             \DB::rollback();
             return $this->errorResponse(['Error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return $this->errorResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        return $this->successResponse(['Status' => 'Success'], Response::HTTP_OK);
     }
 
     /**
