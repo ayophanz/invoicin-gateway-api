@@ -22,7 +22,6 @@ class CreateUsersTable extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->text('twofa_secret')->nullable();
             $table->timestamps();
         });
     }

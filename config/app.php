@@ -13,6 +13,7 @@ return [
     'project_email' => env('PROJECT_EMAIL', NULL),
     'project_support_email' => env('PROJECT_SUPPORT_EMAIL', NULL),
     'project_admin_email' => env('PROJECT_ADMIN_EMAIL', NULL),
+    'project_url' => env('PROJECT_URL', NULL),
 
     /*
     |--------------------------------------------------------------------------

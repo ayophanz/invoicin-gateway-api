@@ -15,6 +15,7 @@ use Auth;
 use Image;
 use Carbon\Carbon;
 use Hashids\Hashids;
+use Redirect;
 
 class AccountController extends Controller
 {
@@ -169,7 +170,7 @@ class AccountController extends Controller
 
     public function verifyUserLink($token)
     {
-      return view('verifyUser', ['token' => $token]);
+        return view('verifyUser', ['token' => $token]);
     }
 
     public function verifyUser($token)
@@ -179,12 +180,13 @@ class AccountController extends Controller
 
         $user = User::find($decodedID);
         if ($user->email_verified_at != null) {
-            return $this->successResponse(['Status' => 'Already verified'], Response::HTTP_OK);
+            return view('verifyUser', ['success' => true, 'message' => 'Your account is already verified!']);
         }
 
         $user->email_verified_at = Carbon::now();
         $user->save();
-        return $this->successResponse(['Status' => 'Verified'], Response::HTTP_OK);
+
+        return view('verifyUser', ['success' => true, 'message' => 'Your account is successfully verified!']);
     }
 
     public function verifyOrganizationLink($token)
@@ -197,6 +199,10 @@ class AccountController extends Controller
         $hashids   = new Hashids('secretkey', 12);
         $decodedID = hex2bin($hashids->decodeHex($token));
         $request->merge(['id' => $decodedID]);
-        return $this->organizationService->verifyOrganization($request);
+        $payload = $this->organizationService->verifyOrganization($request);
+        $content = json_decode($payload->getContent(), true);
+        $status = $content['data']['status'];
+
+        return view('verifyOrganization', ['success' => true, 'message' => $status]);
     }
 }
