@@ -95,25 +95,6 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me(Request $request)
-    {
-        $user = auth()->user();
-        $payload      = $this->organizationService->fetchOrganization($request);
-        $organization = json_decode($payload->getContent(), true);
-        $user->organization_name = $organization['data']['name'];
-        $user->organization_email = $organization['data']['email'];
-        $user->organization_email_verified_at = $organization['data']['email_verified_at'];
-        
-        return response()->json([
-            'me' => $user,
-        ]);
-    }
-
-    /**
      * Generate 2fa secret key
      */
     public function generate2faSecret()

@@ -9,7 +9,8 @@ use App\Models\User;
 use App\Models\Organization;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
-use App\Http\Requests\Register\StoreRequest;
+use App\Http\Requests\Account\StoreRequest;
+use App\Http\Requests\Account\UpdateRequest;
 use App\Events\RegisteredEvent;
 use Auth;
 use Image;
@@ -38,16 +39,6 @@ class AccountController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
     {
         //
     }
@@ -118,54 +109,28 @@ class AccountController extends Controller
             }
         } catch(\Exception $e) {
             \DB::rollback();
-            return $this->errorResponse(['Error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return $this->successResponse(['Status' => 'Success'], Response::HTTP_OK);
+        return $this->successResponse(['status' => 'Success'], Response::HTTP_OK);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $user = auth()->user();
+        $payload      = $this->organizationService->fetchOrganization($request);
+        $organization = json_decode($payload->getContent(), true);
+        $user->organization_name = $organization['data']['name'];
+        $user->organization_email = $organization['data']['email'];
+        $user->organization_email_verified_at = $organization['data']['email_verified_at'];
+        
+        return response()->json([
+            'me' => $user,
+        ]);
     }
 
     public function verifyUserLink($token)
@@ -204,5 +169,21 @@ class AccountController extends Controller
         $status = $content['data']['status'];
 
         return view('verifyOrganization', ['success' => true, 'message' => $status]);
+    }
+
+    public function updateProfile(Request $request, User $user)
+    {
+        $user->first_name = $request->firstname;
+        $user->last_name = $request->lastname;
+        $user->email = $request->email;
+        $user->save();        
+
+        if (count($request->image) > 0) {
+            $profile = 'profile.jpg';
+            $path = storage_path() . '/app/files/user_' . $user->id. '/profile/';
+            \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
+            Image::make($request->image[0])->save($path . $profile);
+        }
+        return $this->successResponse(['status' => 'Success'], Response::HTTP_OK);
     }
 }
