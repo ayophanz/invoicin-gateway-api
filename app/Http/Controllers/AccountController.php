@@ -87,7 +87,7 @@ class AccountController extends Controller
 
             if (count($request->image) > 0) {
                 $profile = 'profile.jpg';
-                $path = storage_path() . '/app/files/user_' . $user->id. '/profile/';
+                $path = storage_path() . '/app/public/files/user_' . $user->id. '/profile/';
                 \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
                 Image::make($request->image[0])->save($path . $profile);
             }
@@ -122,11 +122,16 @@ class AccountController extends Controller
     public function show(Request $request)
     {
         $user = auth()->user();
+        
         $payload      = $this->organizationService->fetchOrganization($request);
         $organization = json_decode($payload->getContent(), true);
         $user->organization_name = $organization['data']['name'];
         $user->organization_email = $organization['data']['email'];
         $user->organization_email_verified_at = $organization['data']['email_verified_at'];
+
+        $url = asset('storage/files/user_' . $user->id .'/profile/profile.jpg' );
+        $image = file_get_contents($url);
+        $user->image = $image;
         
         return response()->json([
             'me' => $user,
@@ -180,7 +185,7 @@ class AccountController extends Controller
 
         if (count($request->image) > 0) {
             $profile = 'profile.jpg';
-            $path = storage_path() . '/app/files/user_' . $user->id. '/profile/';
+            $path = storage_path() . '/app/public/files/user_' . $user->id. '/profile/';
             \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
             Image::make($request->image[0])->save($path . $profile);
         }
