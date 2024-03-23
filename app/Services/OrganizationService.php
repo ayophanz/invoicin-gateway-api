@@ -20,6 +20,14 @@ class OrganizationService
     }
 
     /** Organization */
+    public function validateOrganization(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/validate', $request);
+    }
+    public function verifyOrganization(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/verify', $request);
+    }
     public function fetchOrganization(Request $request)
     {
         return $this->forwardRequest('/api/organization/show', $request);
@@ -28,11 +36,19 @@ class OrganizationService
     {
         return $this->forwardRequest('/api/organization/store', $request);
     }
+    public function fetchOrgCountries(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/countries', $request);
+    }
 
     /** Organization settings */
     public function storeSetting(Request $request)
     {
         return $this->forwardRequest('/api/organization/settings/store', $request);
+    }
+    public function showSetting(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/settings/show', $request);
     }
     public function updateSetting(Request $request)
     {
@@ -44,6 +60,10 @@ class OrganizationService
     }
 
     /** Organization addresses */
+    public function fetchAddress(Request $request)
+    {
+        return $this->forwardRequest('/api/organization/addresses/show', $request);
+    }
     public function storeAddress(Request $request)
     {
         return $this->forwardRequest('/api/organization/addresses/store', $request);

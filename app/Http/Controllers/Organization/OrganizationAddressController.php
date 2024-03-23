@@ -58,7 +58,7 @@ class OrganizationAddressController extends Controller
      */
     public function show(Request $request)
     {
-        //
+        return $this->organizationService->fetchAddress($request);
     }
 
     /**

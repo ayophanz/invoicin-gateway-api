@@ -6,13 +6,21 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
-        "fruitcake/laravel-cors": "^2.0",
+        "bacon/bacon-qr-code": "^2.0",
+        "beyondcode/laravel-websockets": "^1.13",
+        "crazybooot/base64-validation": "^1.0",
         "firebase/php-jwt": "^5.4",
+        "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "hashids/hashids": "^4.1",
+        "intervention/image": "^2.7",
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
+        "paragonie/constant_time_encoding": "^2.6",
         "php-open-source-saver/jwt-auth": "^1.4",
+        "pragmarx/google2fa-laravel": "^2.0",
+        "pusher/pusher-php-server": "^7.0",
         "timwassenburg/laravel-service-generator": "^1.0"
     },
     "require-dev": {

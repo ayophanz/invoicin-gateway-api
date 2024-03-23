@@ -98,4 +98,14 @@ class OrganizationController extends Controller
     {
         //
     }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function countries(Request $request)
+    {
+        return $this->organizationService->fetchOrgCountries($request);
+    }
 }

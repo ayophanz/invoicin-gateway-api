@@ -43,7 +43,7 @@ class CustomerAddressController extends Controller
      */
     public function store(Request $request, $id)
     {
-        return $this->customerService->storeCustomerAddress($request, $id);
+        return $this->customerService->storeAddress($request, $id);
     }
 
     /**
@@ -54,7 +54,7 @@ class CustomerAddressController extends Controller
      */
     public function show(Request $request, $id)
     {
-        return $this->customerService->fetchCustomerAddress($request, $id);
+        return $this->customerService->fetchAddress($request, $id);
     }
 
     /**
@@ -77,7 +77,7 @@ class CustomerAddressController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return $this->customerService->updateCustomerAddress($request, $id);
+        return $this->customerService->updateAddress($request, $id);
     }
 
     /**
@@ -88,6 +88,6 @@ class CustomerAddressController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        return $this->customerService->destroyCustomerAddress($request, $id);
+        return $this->customerService->destroyAddress($request, $id);
     }
 }

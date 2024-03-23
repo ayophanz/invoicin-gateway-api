@@ -4,10 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\Organization;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
+use App\Http\Requests\Account\StoreRequest;
+use App\Http\Requests\Account\UpdateRequest;
+use App\Events\RegisteredEvent;
 use Auth;
+use Image;
+use Carbon\Carbon;
+use Hashids\Hashids;
+use Redirect;
 
 class AccountController extends Controller
 {
@@ -21,7 +30,6 @@ class AccountController extends Controller
      */
     public function __construct(OrganizationService $organizationService)
     {
-        $this->middleware('auth:api', ['except' => ['store']]);
         $this->organizationService = $organizationService;
     }
 
@@ -36,103 +44,170 @@ class AccountController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Validate user registration request.
      *
+     * @param  \Illuminate\Http\StoreRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function userValidate(StoreRequest $request)
     {
-        //
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Validate org registration request.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orgValidate(Request $request)
+    {
+        return $this->organizationService->validateOrganization($request);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\StoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
         if (Auth::check()) Auth::logout();
         \DB::beginTransaction();
         try {
             /** Create account */
             $user             = new User();
-            $user->first_name = $request->first_name;
-            $user->last_name  = $request->last_name;
+            $user->first_name = $request->firstname;
+            $user->last_name  = $request->lastname;
             $user->email      = $request->email;
             $user->password   = bcrypt($request->password);
             $user->save();
             \DB::commit();
 
+            if (count($request->image) > 0) {
+                $profile = 'profile.jpg';
+                $path = storage_path() . '/app/public/files/user_' . $user->id. '/profile/';
+                \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
+                Image::make($request->image[0])->save($path . $profile);
+            }
+
             $credentials = request(['email', 'password']);
             if ($token = auth()->attempt($credentials)) {
-                
+
                 /** Save the organization */
                 $request->headers->set('Authorization', 'Bearer ' . $token);
                 $payload      = $this->organizationService->storeOrganization($request);
                 $content      = json_decode($payload->getContent(), true);
-                $organization = $content;
-                $user->update([
-                    'organization_id' => $organization['data']['uuid']
-                ]);
+                $organization = new Organization([], collect($content['data'])->only(['uuid'])->toArray());
+                
+                $user->organization_id = $organization->uuid;
+                $user->save();
 
-                return response()->json([
-                    'access_token' => $token,
-                    'token_type' => 'bearer',
-                    'expires_in' => auth()->factory()->getTTL() * 60
-                ]);
+                RegisteredEvent::dispatch($user);
                 \DB::commit();
             }
         } catch(\Exception $e) {
             \DB::rollback();
-            return $this->errorResponse(['Error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return $this->errorResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        return $this->successResponse(['status' => 'Success'], Response::HTTP_OK);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        //
+        $user = auth()->user();
+        
+        $payload      = $this->organizationService->fetchOrganization($request);
+        $organization = json_decode($payload->getContent(), true);
+        $user->organization_name = $organization['data']['name'];
+        $user->organization_email = $organization['data']['email'];
+        $user->organization_email_verified_at = $organization['data']['email_verified_at'];
+
+        $url = asset('storage/files/user_' . $user->id .'/profile/profile.jpg' );
+        $image = file_get_contents($url);
+        $user->image = $image;
+        
+        return response()->json([
+            'me' => $user,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function verifyUserLink($token)
     {
-        //
+        return view('verifyUser', ['token' => $token]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function verifyUser($token)
     {
-        //
+        $hashids   = new Hashids('secretkey', 12);
+<<<<<<< HEAD
+        $decodedID = $hashids->decode($token);
+
+        $user = User::find($decodedID);
+        if ($user->email_verified_at != null) {
+            return $this->successResponse(['Status' => 'Already verified'], Response::HTTP_OK);
+=======
+        $decodedID = $hashids->decode($token)[0];
+
+        $user = User::find($decodedID);
+        if ($user->email_verified_at != null) {
+            return view('verifyUser', ['success' => true, 'message' => 'Your account is already verified!']);
+>>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
+        }
+
+        $user->email_verified_at = Carbon::now();
+        $user->save();
+<<<<<<< HEAD
+        return $this->successResponse(['Status' => 'Verified'], Response::HTTP_OK);
+=======
+
+        return view('verifyUser', ['success' => true, 'message' => 'Your account is successfully verified!']);
+>>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function verifyOrganizationLink($token)
     {
-        //
+      return view('verifyOrganization', ['token' => $token]);
+    }
+
+    public function verifyOrganization(Request $request, $token)
+    {
+        $hashids   = new Hashids('secretkey', 12);
+<<<<<<< HEAD
+        $decodedID = $hashids->decodeHex($token);
+
+        $request->merge(['id' => $decodedID]);
+        return $this->organizationService->verifyOrganization($request);
+=======
+        $decodedID = hex2bin($hashids->decodeHex($token));
+        $request->merge(['id' => $decodedID]);
+        $payload = $this->organizationService->verifyOrganization($request);
+        $content = json_decode($payload->getContent(), true);
+        $status = $content['data']['status'];
+
+        return view('verifyOrganization', ['success' => true, 'message' => $status]);
+    }
+
+    public function updateProfile(Request $request, User $user)
+    {
+        $user->first_name = $request->firstname;
+        $user->last_name = $request->lastname;
+        $user->email = $request->email;
+        $user->save();        
+
+        if (count($request->image) > 0) {
+            $profile = 'profile.jpg';
+            $path = storage_path() . '/app/public/files/user_' . $user->id. '/profile/';
+            \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
+            Image::make($request->image[0])->save($path . $profile);
+        }
+        return $this->successResponse(['status' => 'Success'], Response::HTTP_OK);
+>>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
     }
 }

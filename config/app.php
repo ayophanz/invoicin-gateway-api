@@ -2,6 +2,19 @@
 
 return [
 
+     /*
+    |--------------------------------------------------------------------------
+    | Project Environment
+    |--------------------------------------------------------------------------
+    |
+    */
+
+    'project_name' => env('PROJECT_NAME', NULL),
+    'project_email' => env('PROJECT_EMAIL', NULL),
+    'project_support_email' => env('PROJECT_SUPPORT_EMAIL', NULL),
+    'project_admin_email' => env('PROJECT_ADMIN_EMAIL', NULL),
+    'project_url' => env('PROJECT_URL', NULL),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -171,10 +184,12 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        PragmaRX\Google2FALaravel\ServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
     ],
 
     /*
@@ -230,6 +245,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        'Google2FA' => PragmaRX\Google2FALaravel\Facade::class,
+        'Image' => Intervention\Image\Facades\Image::class,
     ],
 
 ];

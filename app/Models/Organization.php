@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Organization extends Model
 {
+    protected $primaryKey = 'uuid';
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      *
