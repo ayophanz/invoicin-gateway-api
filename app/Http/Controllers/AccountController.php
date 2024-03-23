@@ -129,9 +129,9 @@ class AccountController extends Controller
         $user->organization_email = $organization['data']['email'];
         $user->organization_email_verified_at = $organization['data']['email_verified_at'];
 
-        $url = asset('storage/files/user_' . $user->id .'/profile/profile.jpg' );
-        $image = file_get_contents($url);
-        $user->image = $image;
+        // $url = asset('storage/files/user_' . $user->id .'/profile/profile.jpg' );
+        // $image = file_get_contents($url);
+        // $user->image = $image;
         
         return response()->json([
             'me' => $user,
@@ -146,29 +146,17 @@ class AccountController extends Controller
     public function verifyUser($token)
     {
         $hashids   = new Hashids('secretkey', 12);
-<<<<<<< HEAD
-        $decodedID = $hashids->decode($token);
-
-        $user = User::find($decodedID);
-        if ($user->email_verified_at != null) {
-            return $this->successResponse(['Status' => 'Already verified'], Response::HTTP_OK);
-=======
         $decodedID = $hashids->decode($token)[0];
 
         $user = User::find($decodedID);
         if ($user->email_verified_at != null) {
             return view('verifyUser', ['success' => true, 'message' => 'Your account is already verified!']);
->>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
         }
 
         $user->email_verified_at = Carbon::now();
         $user->save();
-<<<<<<< HEAD
-        return $this->successResponse(['Status' => 'Verified'], Response::HTTP_OK);
-=======
 
         return view('verifyUser', ['success' => true, 'message' => 'Your account is successfully verified!']);
->>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
     }
 
     public function verifyOrganizationLink($token)
@@ -179,12 +167,6 @@ class AccountController extends Controller
     public function verifyOrganization(Request $request, $token)
     {
         $hashids   = new Hashids('secretkey', 12);
-<<<<<<< HEAD
-        $decodedID = $hashids->decodeHex($token);
-
-        $request->merge(['id' => $decodedID]);
-        return $this->organizationService->verifyOrganization($request);
-=======
         $decodedID = hex2bin($hashids->decodeHex($token));
         $request->merge(['id' => $decodedID]);
         $payload = $this->organizationService->verifyOrganization($request);
@@ -208,6 +190,5 @@ class AccountController extends Controller
             Image::make($request->image[0])->save($path . $profile);
         }
         return $this->successResponse(['status' => 'Success'], Response::HTTP_OK);
->>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
     }
 }

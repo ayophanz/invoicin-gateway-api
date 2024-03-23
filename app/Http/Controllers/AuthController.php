@@ -39,6 +39,21 @@ class AuthController extends Controller
     }
 
     /**
+     * Check if authenticated
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function isAuth() 
+    {
+        $isAuth = false;
+        if (Auth::check()) $isAuth = true;
+        return response()->json([
+            'isAuth' => $isAuth,
+        ]);
+    }
+
+
+    /**
      * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse

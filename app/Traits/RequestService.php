@@ -203,7 +203,7 @@ trait RequestService
 
         $builder = $config->builder()
                 // Configures the issuer (iss claim)
-                ->issuedBy(env('APP_URL'))
+                ->issuedBy(config('app.url'))
                 // Configures the audience (aud claim)
                 ->permittedFor($this->baseUri)
                 // Configures the time that the token was issue (iat claim)

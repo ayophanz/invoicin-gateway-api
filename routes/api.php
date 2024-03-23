@@ -22,6 +22,7 @@ use App\Http\Controllers\AccountController;
 // });
 
 Route::controller(AuthController::class)->group(function () {
+    Route::get('is-auth', 'isAuth');
     Route::post('login', 'login');
     Route::post('logout', 'logout');
     Route::get('refresh', 'refresh');
