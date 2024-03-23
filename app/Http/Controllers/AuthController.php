@@ -12,6 +12,7 @@ use App\Models\LoginSecurity;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use App\Jobs\ForgotPasswordJob;
+use App\Services\OrganizationService;
 use \ParagonIE\ConstantTime\Base32;
 use Carbon\Carbon; 
 use DB;
@@ -25,15 +26,16 @@ use Redirect;
 class AuthController extends Controller
 {
     use ApiResponser;
+    protected $organizationService;
 
     /**
      * Create a new AuthController instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(OrganizationService $organizationService)
     {
-       //
+        $this->organizationService = $organizationService;
     }
 
     /**
@@ -89,19 +91,6 @@ class AuthController extends Controller
             'expires_in'         => Auth::factory()->getTTL() * 1,
             'user_id'            => Auth::id(),
             'otp_setup_required' => $isOtpSetup,
-        ]);
-    }
-
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me()
-    {
-        $user   = auth()->user();
-        return response()->json([
-            'me' => $user,
         ]);
     }
 

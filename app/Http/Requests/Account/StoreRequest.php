@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Register;
+namespace App\Http\Requests\Account;
 
 use App\Http\Requests\BaseRequest;
 

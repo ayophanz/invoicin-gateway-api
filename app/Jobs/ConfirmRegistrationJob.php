@@ -35,6 +35,7 @@ class ConfirmRegistrationJob implements ShouldQueue
      */
     public function handle()
     {
-        Mail::to($this->user->email)->send(new ConfirmRegistrationMail($this->user));
+        Mail::to($this->user->email, $this->user->last_name . ', ' . $this->user->first_name)
+            ->send(new ConfirmRegistrationMail($this->user));
     }
 }

@@ -32,7 +32,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('forgot-password', 'forgotPassword');
     
     Route::middleware(['auth:api'])->group(function() {
-        Route::get('me', 'me');
         Route::post('disable-2fa', 'disable2fa');
     });
 });
@@ -41,6 +40,11 @@ Route::controller(AccountController::class)->group(function () {
     Route::post('account/register/user/validate', 'userValidate');
     Route::post('account/register/org/validate', 'orgValidate');
     Route::post('account/register/store', 'store');
+
+    Route::middleware(['auth:api'])->group(function() {
+        Route::get('account/show', 'show');
+        Route::put('account/profile/update/{user}', 'updateProfile');
+    });
 });
 
 Route::fallback(function () {

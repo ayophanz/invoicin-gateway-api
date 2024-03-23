@@ -9,12 +9,14 @@ use App\Models\User;
 use App\Models\Organization;
 use App\Traits\ApiResponser;
 use App\Services\OrganizationService;
-use App\Http\Requests\Register\StoreRequest;
+use App\Http\Requests\Account\StoreRequest;
+use App\Http\Requests\Account\UpdateRequest;
 use App\Events\RegisteredEvent;
 use Auth;
 use Image;
 use Carbon\Carbon;
 use Hashids\Hashids;
+use Redirect;
 
 class AccountController extends Controller
 {
@@ -37,16 +39,6 @@ class AccountController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
     {
         //
     }
@@ -95,7 +87,7 @@ class AccountController extends Controller
 
             if (count($request->image) > 0) {
                 $profile = 'profile.jpg';
-                $path = storage_path() . '/app/files/user_' . $user->id. '/profile/';
+                $path = storage_path() . '/app/public/files/user_' . $user->id. '/profile/';
                 \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
                 Image::make($request->image[0])->save($path . $profile);
             }
@@ -107,91 +99,76 @@ class AccountController extends Controller
                 $request->headers->set('Authorization', 'Bearer ' . $token);
                 $payload      = $this->organizationService->storeOrganization($request);
                 $content      = json_decode($payload->getContent(), true);
-                $organization = new Organization([], collect($content['data'])->only(['uuid', 'name', 'type', 'email'])->toArray());
+                $organization = new Organization([], collect($content['data'])->only(['uuid'])->toArray());
                 
                 $user->organization_id = $organization->uuid;
                 $user->save();
 
                 RegisteredEvent::dispatch($user);
-                // return response()->json([
-                //     'token'              => $token,
-                //     'token_type'         => 'bearer',
-                //     'expires_in'         => Auth::factory()->getTTL() * 1,
-                //     'user_id'            => Auth::id(),
-                //     'otp_setup_required' => false,
-                // ]);
                 \DB::commit();
             }
         } catch(\Exception $e) {
             \DB::rollback();
-            return $this->errorResponse(['Error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->errorResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return $this->errorResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        return $this->successResponse(['status' => 'Success'], Response::HTTP_OK);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        //
-    }
+        $user = auth()->user();
+        
+        $payload      = $this->organizationService->fetchOrganization($request);
+        $organization = json_decode($payload->getContent(), true);
+        $user->organization_name = $organization['data']['name'];
+        $user->organization_email = $organization['data']['email'];
+        $user->organization_email_verified_at = $organization['data']['email_verified_at'];
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $url = asset('storage/files/user_' . $user->id .'/profile/profile.jpg' );
+        $image = file_get_contents($url);
+        $user->image = $image;
+        
+        return response()->json([
+            'me' => $user,
+        ]);
     }
 
     public function verifyUserLink($token)
     {
-      return view('verifyUser', ['token' => $token]);
+        return view('verifyUser', ['token' => $token]);
     }
 
     public function verifyUser($token)
     {
         $hashids   = new Hashids('secretkey', 12);
+<<<<<<< HEAD
         $decodedID = $hashids->decode($token);
 
         $user = User::find($decodedID);
         if ($user->email_verified_at != null) {
             return $this->successResponse(['Status' => 'Already verified'], Response::HTTP_OK);
+=======
+        $decodedID = $hashids->decode($token)[0];
+
+        $user = User::find($decodedID);
+        if ($user->email_verified_at != null) {
+            return view('verifyUser', ['success' => true, 'message' => 'Your account is already verified!']);
+>>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
         }
 
         $user->email_verified_at = Carbon::now();
         $user->save();
+<<<<<<< HEAD
         return $this->successResponse(['Status' => 'Verified'], Response::HTTP_OK);
+=======
+
+        return view('verifyUser', ['success' => true, 'message' => 'Your account is successfully verified!']);
+>>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
     }
 
     public function verifyOrganizationLink($token)
@@ -202,9 +179,35 @@ class AccountController extends Controller
     public function verifyOrganization(Request $request, $token)
     {
         $hashids   = new Hashids('secretkey', 12);
+<<<<<<< HEAD
         $decodedID = $hashids->decodeHex($token);
 
         $request->merge(['id' => $decodedID]);
         return $this->organizationService->verifyOrganization($request);
+=======
+        $decodedID = hex2bin($hashids->decodeHex($token));
+        $request->merge(['id' => $decodedID]);
+        $payload = $this->organizationService->verifyOrganization($request);
+        $content = json_decode($payload->getContent(), true);
+        $status = $content['data']['status'];
+
+        return view('verifyOrganization', ['success' => true, 'message' => $status]);
+    }
+
+    public function updateProfile(Request $request, User $user)
+    {
+        $user->first_name = $request->firstname;
+        $user->last_name = $request->lastname;
+        $user->email = $request->email;
+        $user->save();        
+
+        if (count($request->image) > 0) {
+            $profile = 'profile.jpg';
+            $path = storage_path() . '/app/public/files/user_' . $user->id. '/profile/';
+            \File::isDirectory($path) or \File::makeDirectory($path, 0777, true, true);
+            Image::make($request->image[0])->save($path . $profile);
+        }
+        return $this->successResponse(['status' => 'Success'], Response::HTTP_OK);
+>>>>>>> 616b17d43b58d70098c39f35e397c6d58d04d74d
     }
 }
