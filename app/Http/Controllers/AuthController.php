@@ -54,7 +54,7 @@ class AuthController extends Controller
 
         $token = Auth::attempt($credentials);
         if (!$token) {
-            return $this->errorResponse(['message' => 'Invalid Password or Email'], Response::HTTP_UNAUTHORIZED);
+            return $this->errorResponse(['message' => 'Invalid password or email'], Response::HTTP_UNAUTHORIZED);
         }
 
         $user = Auth::user();
